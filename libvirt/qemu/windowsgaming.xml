@@ -32,7 +32,8 @@ or other application using the libvirt API.
   </cputune>
   <os>
     <type arch='x86_64' machine='pc-q35-6.1'>hvm</type>
-    <loader readonly="yes" type="pflash">/usr/share/edk2-ovmf/x64/OVMF_CODE.fd</loader>
+    <loader readonly='yes' type='pflash'>/usr/share/edk2-ovmf/x64/OVMF_CODE.fd</loader>
+    <nvram>/var/lib/libvirt/qemu/nvram/windowsgaming_VARS.fd</nvram>
     <boot dev='hd'/>
   </os>
   <features>
@@ -75,6 +76,12 @@ or other application using the libvirt API.
       <source file='/home/fanfan/Public/VM/windows-gaming.img'/>
       <target dev='vda' bus='virtio'/>
       <address type='pci' domain='0x0000' bus='0x03' slot='0x00' function='0x0'/>
+    </disk>
+    <disk type='block' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native'/>
+      <source dev='/dev/sda'/>
+      <target dev='vdb' bus='virtio'/>
+      <address type='pci' domain='0x0000' bus='0x0b' slot='0x00' function='0x0'/>
     </disk>
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
@@ -139,6 +146,11 @@ or other application using the libvirt API.
       <model name='pcie-root-port'/>
       <target chassis='10' port='0x11'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x1'/>
+    </controller>
+    <controller type='pci' index='11' model='pcie-root-port'>
+      <model name='pcie-root-port'/>
+      <target chassis='11' port='0x12'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x2'/>
     </controller>
     <interface type='network'>
       <mac address='52:54:00:8c:8a:12'/>
