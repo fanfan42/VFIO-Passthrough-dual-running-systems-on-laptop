@@ -1097,6 +1097,10 @@ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
   </table>
 </details>
 
+At this point, you can launch your VM. Don't forget to disable your screen plugged on the HDMI port. In Manjaro -> Control Center -> Display Manager -> shutdown the screen attached to the HDMI port
+Or your computer will freeze.
+When shutting down the VM, you will be able to plug the screen again
+
 ### **Windows drivers**
 
 To get the *network*, *sound*, *mouse* and *keyboard* working properly you need to install the drivers.
