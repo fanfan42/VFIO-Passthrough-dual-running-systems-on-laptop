@@ -1,0 +1,18 @@
+Prioritaire :
+https://gitlab.com/Mageas/vfio-single-gup-passthrough
+https://www.youtube.com/watch?v=CwEVj00SwYM
+Si code 43 (laptop) : https://asus-linux.org/wiki/vfio-guide/
+virtio-win : https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
+
+
+autres:
+https://github.com/UtkarshVerma/qemu-vfio-win10
+https://github.com/aiberia/persistent-evdev
+https://computernewb.com/wiki/How_to_install_Windows_10_in_QEMU
+https://github.com/pavolelsig/passthrough_helper_manjaro
+https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF
+https://github.com/clearlinux/common
+https://wiki.archlinux.org/title/NVIDIA
+https://lantian.pub/en/article/modify-computer/laptop-intel-nvidia-optimus-passthrough.lantian/
+https://github.com/joeknock90/Single-GPU-Passthrough
+
