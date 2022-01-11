@@ -13,8 +13,8 @@ or other application using the libvirt API.
       <libosinfo:os id="http://microsoft.com/win/10"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory unit='KiB'>12582912</memory>
-  <currentMemory unit='KiB'>12582912</currentMemory>
+  <memory unit='KiB'>10485760</memory>
+  <currentMemory unit='KiB'>10485760</currentMemory>
   <memoryBacking>
     <hugepages/>
   </memoryBacking>
