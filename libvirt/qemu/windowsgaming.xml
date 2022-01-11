@@ -152,6 +152,15 @@ or other application using the libvirt API.
       <target chassis='11' port='0x12'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x2'/>
     </controller>
+    <controller type='pci' index='12' model='pcie-root-port'>
+      <model name='pcie-root-port'/>
+      <target chassis='12' port='0x13'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x3'/>
+    </controller>
+    <controller type='pci' index='13' model='pcie-to-pci-bridge'>
+      <model name='pcie-pci-bridge'/>
+      <address type='pci' domain='0x0000' bus='0x0c' slot='0x00' function='0x0'/>
+    </controller>
     <interface type='network'>
       <mac address='52:54:00:8c:8a:12'/>
       <source network='default'/>
@@ -213,6 +222,13 @@ or other application using the libvirt API.
         <product id='0x0016'/>
       </source>
       <address type='usb' bus='0' port='2'/>
+    </hostdev>
+    <hostdev mode='subsystem' type='usb' managed='yes'>
+      <source>
+        <vendor id='0x1bad'/>
+        <product id='0xfa01'/>
+      </source>
+      <address type='usb' bus='0' port='5'/>
     </hostdev>
     <redirdev bus='usb' type='spicevmc'>
       <address type='usb' bus='0' port='3'/>
