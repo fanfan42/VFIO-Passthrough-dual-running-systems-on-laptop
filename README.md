@@ -1,5 +1,7 @@
 # VFIO-Passthrough-dual-running-systems-on-laptop
 
+EDIT: When I installed my Manjaro, at the beginning I could "unload" nouveau module. Sometimes, my interface froze but most of the time, I could have a working VM and my workstation. Now, I have to kill lightdm and restart it
+
 This repository is nearly the same from Mageas at https://gitlab.com/Mageas/vfio-single-gup-passthrough so I keep all his greetings, thanks to all of you
 The only real differences is that I install it on a laptop and it's not a Single GPU passthrough, I can use both my Linux and Windows 10
 
@@ -27,6 +29,7 @@ The VM is close to native performance with 3% of performance losses.
 - [**CPU Pinning**](#cpu-pinning)
 - [**Hyper-V Enlightenments**](#hyper-v-enlightenments)
 - [**Disk Tuning**](#disk-tuning)
+- [**Only laptop with Nvidia card Tuning**](#only-laptop-with-nvidia-card-tuning)
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
 - [**Windows drivers**](#windows-drivers)
@@ -248,7 +251,7 @@ vim /etc/libvirt/hooks/kvm.conf
 
 ```conf
 # CONFIG
-VM_MEMORY=8192
+VM_MEMORY=10240
 
 # VIRSH
 VIRSH_GPU_VIDEO=pci_0000_01_00_0
@@ -311,6 +314,16 @@ set -x
 # Load variables
 source "/etc/libvirt/hooks/kvm.conf"
 
+lsmod | grep nouveau
+CHECK=$?
+
+# Stop display manager
+if [ $CHECK -ne 1 ] ; then
+	systemctl stop lightdm.service
+	sleep 5
+        modprobe -r nouveau
+fi
+
 # Unbind the GPU from display driver
 virsh nodedev-detach $VIRSH_GPU_VIDEO
 virsh nodedev-detach $VIRSH_GPU_AUDIO
@@ -321,7 +334,11 @@ virsh nodedev-detach $VIRSH_SERIAL_BUS
 modprobe vfio-pci
 modprobe vfio
 modprobe vfio_iommu_type1
-modprobe vfio_virqfd 
+
+# Restart lightdm
+if [ $CHECK -ne 1 ] ; then
+	systemctl start lightdm
+fi
 ```
 
   </td>
@@ -358,13 +375,16 @@ source "/etc/libvirt/hooks/kvm.conf"
 modprobe -r vfio-pci
 modprobe -r vfio_iommu_type1
 modprobe -r vfio
-modprobe -r vfio_virqfd
 
 # Re-Bind GPU to Nvidia Driver
 virsh nodedev-reattach $VIRSH_GPU_VIDEO
 virsh nodedev-reattach $VIRSH_GPU_AUDIO
 virsh nodedev-reattach $VIRSH_USB
 virsh nodedev-reattach $VIRSH_SERIAL_BUS
+
+# Reload nouveau module
+sleep 5
+modprobe nouveau
 ```
 
   </td>
@@ -784,7 +804,7 @@ XML
   </table>
 </details>
 
-You need to match your CPU pathrough.
+You need to match your CPU pathtrough.
 
 <table>
 <tr>
@@ -1015,8 +1035,8 @@ XML
 
 ```xml
 ...
-  <memory unit="KiB">8388608</memory>
-  <currentMemory unit="KiB">8388608</currentMemory>
+  <memory unit="KiB">10485760</memory>
+  <currentMemory unit="KiB">10485760</currentMemory>
   <memoryBacking>
     <hugepages/>
   </memoryBacking>

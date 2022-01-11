@@ -5,10 +5,10 @@ set -x
 source "/etc/libvirt/hooks/kvm.conf"
 
 # Unload VFIO-PCI Kernel Driver
-modprobe -r vfio-pci
+modprobe -r vfio_pci
 modprobe -r vfio_iommu_type1
 modprobe -r vfio
-modprobe -r vfio_virqfd
+#modprobe -r vfio_virqfd
 
 # Re-Bind GPU to Nvidia Driver
 virsh nodedev-reattach $VIRSH_GPU_VIDEO
@@ -31,8 +31,10 @@ virsh nodedev-reattach $VIRSH_SERIAL_BUS
 #modprobe drm
 #modprobe nvidia_uvm
 #modprobe nvidia
-#sleep 10
-#modprobe nouveau
+
+# Reload nouveau module
+sleep 5
+modprobe nouveau
 #echo 1 > /sys/bus/pci/devices/0000\:01\:00.0/remove
 #echo 1 > /sys/bus/pci/devices/0000\:01\:00.1/remove
 #echo 1 > /sys/bus/pci/devices/0000\:01\:00.2/remove 
