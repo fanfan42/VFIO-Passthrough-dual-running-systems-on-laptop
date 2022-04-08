@@ -5,6 +5,7 @@ Many problems :
   - nouveau doesn't support RTX 30xx
   - I need optimus-manager in order to switch between nvidia and intel
   - I have to start the VM before I can use my dual-screen with nvidia 
+
 After all configuration is finished, when you restart your PC, you may notice that your Nvidia card has disappeared from your lspci, nvidia isn't loaded and your second monitor isn't used by Manjaro, that's normal. Start the VM. Stop the VM. Nvidia is bound. You can now start/stop your VM as musch as you want but for each start/stop action, lightdm will restart
 
 ### **Table Of Contents**

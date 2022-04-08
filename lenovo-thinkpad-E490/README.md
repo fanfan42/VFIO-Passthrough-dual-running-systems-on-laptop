@@ -16,7 +16,7 @@ This mode cannot allow to play high-end graphics games but I can still play AOE 
 - [**Audio Passthrough**](#audio-passthrough)
 - [**CPU Pinning**](#cpu-pinning)
 - [**Disk Tuning**](#disk-tuning)
-- [**Hyper-V Enlightenments**](#hyper-v-enlightenments)
+- [**Hyper-V Enlightenments and others**](#hyper-v-enlightenments-and-others)
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
 - [**Windows drivers**](#windows-drivers)
