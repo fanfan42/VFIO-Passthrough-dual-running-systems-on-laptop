@@ -26,11 +26,11 @@ This mode cannot allow to play high-end graphics games but I can still play AOE 
 
 Ensure that ***Intel VT-d*** is supported by the CPU and enabled in the BIOS settings.
 
-Enable IOMMU support by setting the kernel parameter depending on your CPU.
+Enable IOMMU and intel gvt-g support by setting the kernel parameters
 
-| /etc/default/grub                                              |
-|----------------------------------------------------------------|
-| `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on iommu=pt ..."` |
+| /etc/default/grub                                                                                           |
+|-------------------------------------------------------------------------------------------------------------|
+| `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on i915.enable_gvt=1 i915.enable_guc=0 i915.enable_fbc=0 ..."` |
 
 Generate grub.cfg
 ```sh
@@ -108,10 +108,19 @@ Windows can't detect the ***virtio disk***, so you need to ***Load Driver*** and
 Windows can't connect to the internet, we will activate internet later in this tutorial.
 
 ### **Attaching PCI devices**
+https://wiki.archlinux.org/title/Intel_GVT-g#Prerequisite
 
 in a terminal :
+
 ```sh
+ls /sys/devices/pci/0000\:00\:02.0/mdev_supported_types
+i915-GVTg_V5_1  # Video memory: <512MB, 2048MB>, resolution: up to 1920x1200
+i915-GVTg_V5_2  # Video memory: <256MB, 1024MB>, resolution: up to 1920x1200
+i915-GVTg_V5_4  # Video memory: <128MB, 512MB>, resolution: up to 1920x1200
+i915-GVTg_V5_8  # Video memory: <64MB, 384MB>, resolution: up to 1024x768
+
 sudo -s
+# uuidgen
 echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > /sys/bus/pci/devices/i915-GVTg_V5_4/create
 ```
 
@@ -332,6 +341,10 @@ XML
 </tr>
 </table>
 
+Add yourself in the input group:
+```sh
+usermod -a -G input yourself
+``` 
 Find your mouse device in ***/dev/input/by-id***. You'd generally use the devices ending with ***event-mouse***. And the devices in your configuration right before closing `</domain>` tag.
 
 You can verify if it works by `cat /dev/input/by-id/DEVICE_NAME`.
@@ -361,6 +374,10 @@ XML
 </tr>
 </table>
 
+Add yourself in the kvm group:
+```sh
+usermod -a -G kvm yourself
+```
 You need to include these devices in your qemu config.
 
 <table>
@@ -375,7 +392,7 @@ You need to include these devices in your qemu config.
 
 ```conf
 ...
-user = "YOUR_USERNAME"
+user = "yourself"
 group = "kvm"
 ...
 cgroup_device_acl = [
@@ -639,6 +656,8 @@ XML
 </table>
 
 ### **Hyper-V Enlightenments and others**
+When you will add the MDEV device, you will lose all display with a classic QXL display
+There are several ways to have the display working. I chose DMA-BUF. For other ways or more explanation, please read this link:https://wiki.archlinux.org/title/Intel_GVT-g#Using_DMA-BUF_display
 
 In a terminal:
 ```sh
@@ -672,10 +691,10 @@ XML
     <qemu:arg value="base=localtime"/>
     <qemu:arg value="-cpu"/>
     <qemu:arg value="host,host-cache-info=on,kvm=off,l3-cache=on,kvm-hint-dedicated=on,migratable=no,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_vendor_id=deadbeef,+invtsc,+topoext"/>
-        <qemu:arg value='-set'/>
+    <qemu:arg value='-set'/>
     <qemu:arg value='device.hostdev0.x-igd-opregion=on'/>
     <qemu:arg value='-set'/>
-    <qemu:arg value='device.hostdev0.romfile=/wherever/yout/path/vbios_gvt_uefi.rom'/>
+    <qemu:arg value='device.hostdev0.romfile=/wherever/your/path/vbios_gvt_uefi.rom'/>
     <qemu:arg value='-set'/>
     <qemu:arg value='device.hostdev0.ramfb=on'/>
     <qemu:arg value='-set'/>
@@ -685,7 +704,7 @@ XML
     <qemu:arg value='-set'/>
     <qemu:arg value='device.hostdev0.display=on'/>
     <qemu:env name='INTEL_DEBUG' value='norbc'/>
-    <qemu:env name='DISPLAY' value='THE_RESULT_OF_YOUR_ECHO_CMD_LINE_BEFORE'/>
+    <qemu:env name='DISPLAY' value=':0'/>
   </qemu:commandline>
 </devices>
 ```

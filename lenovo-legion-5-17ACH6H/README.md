@@ -5,6 +5,7 @@ Many problems :
   - nouveau doesn't support RTX 30xx
   - I need optimus-manager in order to switch between nvidia and intel
   - I have to start the VM before I can use my dual-screen with nvidia 
+After all configuration is finished, when you restart your PC, you may notice that your Nvidia card has disappeared from your lspci, nvidia isn't loaded and your second monitor isn't used by Manjaro, that's normal. Start the VM. Stop the VM. Nvidia is bound. You can now start/stop your VM as musch as you want but for each start/stop action, lightdm will restart
 
 ### **Table Of Contents**
 - [**Enable & Verify IOMMU**](#enable-verify-iommu)
@@ -38,7 +39,7 @@ Enable IOMMU support by setting the kernel parameter for AMD CPU.
 
 | /etc/default/grub                                              |
 |----------------------------------------------------------------|
-| `GRUB_CMDLINE_LINUX_DEFAULT="... amd_iommu=on iommu=pt ..."`   |
+| `GRUB_CMDLINE_LINUX_DEFAULT="... amd_iommu=on iommu=pt iomem=relaxed ..."`   |
 
 Generate grub.cfg
 ```sh
@@ -68,7 +69,7 @@ IOMMU Group 10:
 pacman -S --needed qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables vim yay linuxxxx-nvidia
 ```
 You can replace iptables with iptables-nft if asked
-linuxxx-nvidia refers to your kernel version, ex: linux516-nvidia 
+linuxxxx-nvidia refers to your kernel version, ex: linux516-nvidia 
 
 ```sh
 yay -S optimus-manager
@@ -82,6 +83,8 @@ in /usr/share/optimus-manager.conf :
 pci_remove=yes
 ...
 startup_mode=integrated
+...
+auto_logout=no
 ```
 
 ### **Enable required services**
@@ -97,7 +100,7 @@ virsh net-start default
 virsh net-autostart default
 ```
 
-Enable optimus-manager (need reboot)
+Enable optimus-manager (needs reboot)
 ```sh
 systemctl enable optimus-manager
 ```
@@ -429,7 +432,7 @@ You need to include these devices in your qemu config.
 
 ```conf
 ...
-user = "YOUR_USERNAME"
+user = "root"
 group = "kvm"
 ...
 cgroup_device_acl = [

@@ -16,7 +16,7 @@ This mode cannot allow to play high-end graphics games but I can still play AOE 
 - [**Audio Passthrough**](#audio-passthrough)
 - [**CPU Pinning**](#cpu-pinning)
 - [**Disk Tuning**](#disk-tuning)
-- [**Hyper-V Enlightenments**](#hyper-v-enlightenments)
+- [**Hyper-V Enlightenments and others**](#hyper-v-enlightenments)
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
 - [**Windows drivers**](#windows-drivers)
@@ -26,11 +26,11 @@ This mode cannot allow to play high-end graphics games but I can still play AOE 
 
 Ensure that ***Intel VT-d*** is supported by the CPU and enabled in the BIOS settings.
 
-Enable IOMMU support by setting the kernel parameter depending on your CPU.
+Enable IOMMU and intel gvt-gsupport by setting the kernel parameters
 
 | /etc/default/grub                                              |
 |----------------------------------------------------------------|
-| `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on iommu=pt ..."` |
+| `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on i915.enable_gvt=1 i915.enable_guc=0 i915.enable_fbc=0 ..."` |
 
 Generate grub.cfg
 ```sh
@@ -109,10 +109,20 @@ Windows can't connect to the internet, we will activate internet later in this t
 
 ### **Attaching PCI devices**
 
+https://wiki.archlinux.org/title/Intel_GVT-g#Prerequisite
+
 in a terminal :
+
 ```sh
+ls /sys/devices/pci/0000\:00\:02.0/mdev_supported_types
+i915-GVTg_V5_1  # Video memory: <512MB, 2048MB>, resolution: up to 1920x1200
+i915-GVTg_V5_2  # Video memory: <256MB, 1024MB>, resolution: up to 1920x1200
+i915-GVTg_V5_4  # Video memory: <128MB, 512MB>, resolution: up to 1920x1200
+i915-GVTg_V5_8  # Video memory: <64MB, 384MB>, resolution: up to 1024x768
+
 sudo -s
-echo 65e0c490-1f9f-47e2-87b4-3f3d14255b2f > /sys/bus/pci/devices/i915-GVTg_V5_4/create
+# uuidgen
+echo 46d7d7e9-d914-46f4-b3d8-c5a8cd2e0541 > /sys/bus/pci/devices/0000\:00\:02.0/mdev_supported_types/i915-GVTg_V5_4/create
 ```
 
 The devices you want to passthrough.
@@ -218,7 +228,7 @@ vim /etc/libvirt/hooks/kvm.conf
 # CONFIG
 VM_MEMORY=12288
 
-GVT_GUID=65e0c490-1f9f-47e2-87b4-3f3d14255b2f
+GVT_GUID=46d7d7e9-d914-46f4-b3d8-c5a8cd2e0541
 MDEV_TYPE=i915-GVTg_V5_4
 ```
 
@@ -332,6 +342,10 @@ XML
 </tr>
 </table>
 
+Add yourself in the input group:
+```sh
+usermod -a -G input yourself
+```
 Find your mouse device in ***/dev/input/by-id***. You'd generally use the devices ending with ***event-mouse***. And the devices in your configuration right before closing `</domain>` tag.
 
 You can verify if it works by `cat /dev/input/by-id/DEVICE_NAME`.
@@ -360,7 +374,10 @@ XML
 </td>
 </tr>
 </table>
-
+Add yourself in the KVM group:
+```sh
+usermod -a -G kvm yourself
+```
 You need to include these devices in your qemu config.
 
 <table>
@@ -375,7 +392,7 @@ You need to include these devices in your qemu config.
 
 ```conf
 ...
-user = "YOUR_USERNAME"
+user = "yourself"
 group = "kvm"
 ...
 cgroup_device_acl = [
@@ -639,6 +656,8 @@ XML
 </table>
 
 ### **Hyper-V Enlightenments and others**
+When you will add the MDEV device, you will lose all display with a classic QXL display
+There are several ways to have the display working. I chose DMA-BUF. For other ways or more explanation, please read this link: https://wiki.archlinux.org/title/Intel_GVT-g#Using_DMA-BUF_display
 
 In a terminal:
 ```sh
@@ -685,7 +704,7 @@ XML
     <qemu:arg value='-set'/>
     <qemu:arg value='device.hostdev0.display=on'/>
     <qemu:env name='INTEL_DEBUG' value='norbc'/>
-    <qemu:env name='DISPLAY' value='THE_RESULT_OF_YOUR_ECHO_CMD_LINE_BEFORE'/>
+    <qemu:env name='DISPLAY' value=':0'/>
   </qemu:commandline>
 </devices>
 ```

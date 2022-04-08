@@ -2,12 +2,16 @@
 ## Introduction
 
 This repository has not the goal to be the most precise configuration for running Passthrough VM. It's just some success tests I tried on my own laptops. At this time, I can succesfully install a Windows 10 VM on :
+
 Dual GPU PC :
-- Lenovo Legion Y540-15IRH (with nvidia GTX 1660Ti)
-- Lenovo Legion 5 17ACH6H (with nvidia RTX 3060)
+- Lenovo Legion Y540-15IRH (with nvidia GTX 1660Ti, intel core i5 8 cores, 16GB RAM)
+- Lenovo Legion 5 17ACH6H (with nvidia RTX 3060, amd ryzen 7 16 cores, 32GB RAM)
+
 Single GPU PC (intel, only from 6th to 9th generation):
-- Lenovo Thinkpad E490
-- Toshiba Satellite Pro A50-E-156
+- Lenovo Thinkpad E490 (intel i5 8th generation 8 cores, 16GB RAM)
+- Toshiba Satellite Pro A50-E-156 (intel i7 8th generation 8 cores, 16GB RAM)
+
+The base OS used on the host is Manjaro (Mate)
 
 This repository is based the one created by Mageas at https://gitlab.com/Mageas/vfio-single-gup-passthrough so I keep all his greetings, thanks to all of you
 The only real differences is that I install it on a laptop and it's not a Single GPU passthrough, I can use both my Linux and Windows 10
