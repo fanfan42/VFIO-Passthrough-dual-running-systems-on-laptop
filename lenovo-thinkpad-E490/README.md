@@ -691,21 +691,22 @@ XML
     <qemu:arg value="base=localtime"/>
     <qemu:arg value="-cpu"/>
     <qemu:arg value="host,host-cache-info=on,kvm=off,l3-cache=on,kvm-hint-dedicated=on,migratable=no,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_vendor_id=deadbeef,+invtsc,+topoext"/>
-    <qemu:arg value='-set'/>
-    <qemu:arg value='device.hostdev0.x-igd-opregion=on'/>
-    <qemu:arg value='-set'/>
-    <qemu:arg value='device.hostdev0.romfile=/wherever/your/path/vbios_gvt_uefi.rom'/>
-    <qemu:arg value='-set'/>
-    <qemu:arg value='device.hostdev0.ramfb=on'/>
-    <qemu:arg value='-set'/>
-    <qemu:arg value='device.hostdev0.driver=vfio-pci-nohotplug'/>
     <qemu:arg value='-display'/>
     <qemu:arg value='gtk,gl=on,zoom-to-fit=on'/>
-    <qemu:arg value='-set'/>
-    <qemu:arg value='device.hostdev0.display=on'/>
     <qemu:env name='INTEL_DEBUG' value='norbc'/>
     <qemu:env name='DISPLAY' value=':0'/>
   </qemu:commandline>
+  <qemu:override>
+    <qemu:device alias='hostdev0'>
+      <qemu:frontend>
+        <qemu:property name='x-igd-opregion' type='bool' value='true'/>
+        <qemu:property name='romfile' type='string' value='/whereever/your/path/vbios_gvt_uefi.rom'/>
+        <qemu:property name='ramfb' type='bool' value='true'/>
+        <qemu:property name='driver' type='string' value='vfio-pci-nohotplug'/>
+        <qemu:property name='display' type='string' value='on'/>
+      </qemu:frontend>
+    </qemu:device>
+  </qemu:override>
 </devices>
 ```
 
