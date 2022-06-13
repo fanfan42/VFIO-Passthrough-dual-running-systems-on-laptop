@@ -169,7 +169,7 @@ or other application using the libvirt API.
     </console>
     <input type='mouse' bus='ps2'/>
     <input type='keyboard' bus='ps2'/>
-    <audio id='1' type='pulseaudio'/>
+    <audio id='1' type='none'/>
     <hostdev mode='subsystem' type='mdev' managed='no' model='vfio-pci' display='off'>
       <source>
         <address uuid='46d7d7e9-d914-46f4-b3d8-c5a8cd2e0541'/>

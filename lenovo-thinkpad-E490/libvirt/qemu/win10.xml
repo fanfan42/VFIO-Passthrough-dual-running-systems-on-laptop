@@ -188,7 +188,7 @@ or other application using the libvirt API.
     <input type='mouse' bus='virtio'>
       <address type='pci' domain='0x0000' bus='0x09' slot='0x00' function='0x0'/>
     </input>
-    <audio id='1' type='spice'/>
+    <audio id='1' type='none'/>
     <hostdev mode='subsystem' type='mdev' managed='no' model='vfio-pci' display='off'>
       <source>
         <address uuid='65e0c490-1f9f-47e2-87b4-3f3d14255b2f'/>
