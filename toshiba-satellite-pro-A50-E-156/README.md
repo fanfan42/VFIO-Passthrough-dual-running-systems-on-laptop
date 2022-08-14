@@ -3,7 +3,7 @@
 This mode cannot allow to play high-end graphics games but I can still play AOE II DE with the lowest graphics settings 
 
 ### **Table Of Contents**
-- [**Enable & Verify IOMMU**](#enable-verify-iommu)
+- [**Enable & Verify IOMMU and GVT**](#enable-verify-iommu-and-gvt)
 - [**Install required tools**](#install-required-tools)
 - [**Enable required services**](#enable-required-services)
 - [**Setup Guest OS**](#setup-guest-os)
@@ -22,7 +22,7 @@ This mode cannot allow to play high-end graphics games but I can still play AOE 
 - [**Windows drivers**](#windows-drivers)
 - [**Optimize Windows**](#optimize-windows)
 
-### **Enable & Verify IOMMU**
+### **Enable & Verify IOMMU and GVT**
 
 Ensure that ***Intel VT-d*** is supported by the CPU and enabled in the BIOS settings.
 
@@ -35,6 +35,13 @@ Enable IOMMU and intel gvt-gsupport by setting the kernel parameters
 Generate grub.cfg
 ```sh
 grub-mkconfig -o /boot/grub/grub.cfg
+```
+
+Add some modules to load at boot in /etc/modules-load.d/modules.conf
+```sh
+mdev
+vfio_iommu_type1
+kvmgt
 ```
 
 After rebooting, check that the groups are valid.
@@ -56,7 +63,7 @@ IOMMU Group 1:
 ### **Install required tools**
 
 ```sh
-pacman -S --needed qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables vim
+pacman -S --needed qemu-base qemu-ui-gtk qemu-ui-opengl qemu-audio-pa libvirt edk2-ovmf virt-manager dnsmasq ebtables vim 
 ```
 You can replace iptables with iptables-nft if asked
 
@@ -342,7 +349,7 @@ XML
 </tr>
 </table>
 
-Add yourself in the input group:
+Add yourself in the input group :
 ```sh
 usermod -a -G input yourself
 ```
@@ -925,7 +932,7 @@ chmod +x /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_ondemand.sh
 
 ## Enable CPU governor on-demand mode
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "ondemand" > $file; done
+for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "powersave" > $file; done
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 ```
 
