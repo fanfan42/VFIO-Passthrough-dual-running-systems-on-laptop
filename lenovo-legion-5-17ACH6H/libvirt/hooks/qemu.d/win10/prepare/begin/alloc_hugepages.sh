@@ -26,4 +26,3 @@ then
   echo 0 > /proc/sys/vm/nr_hugepages
   exit 1
 fi
-

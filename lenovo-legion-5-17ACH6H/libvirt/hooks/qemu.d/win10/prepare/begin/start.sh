@@ -17,10 +17,11 @@ if [ $CHECK -ne 1 ] ; then
 	virsh nodedev-detach $VIRSH_GPU_VIDEO
 	virsh nodedev-detach $VIRSH_GPU_AUDIO
 	modprobe vfio vfio_pci vfio_iommu_type1
-	systemctl start lightdm
+	systemctl start lightdm.service
 else
 	echo "1" > /sys/bus/pci/rescan
 	virsh nodedev-detach $VIRSH_GPU_VIDEO
 	virsh nodedev-detach $VIRSH_GPU_AUDIO
 	modprobe vfio vfio_pci vfio_iommu_type1
 fi
+

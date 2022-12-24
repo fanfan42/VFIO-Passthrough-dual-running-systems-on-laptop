@@ -13,5 +13,6 @@ modprobe -r vfio
 virsh nodedev-reattach $VIRSH_GPU_VIDEO
 virsh nodedev-reattach $VIRSH_GPU_AUDIO
 
+# Restart lightdm with nvidia
 optimus-manager --switch hybrid --no-confirm
 systemctl restart lightdm

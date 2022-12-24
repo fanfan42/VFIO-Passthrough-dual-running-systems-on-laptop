@@ -239,7 +239,7 @@ vim /etc/libvirt/hooks/kvm.conf
 
 ```conf
 # CONFIG
-VM_MEMORY=22528
+VM_MEMORY=24576
 
 # VIRSH
 VIRSH_GPU_VIDEO=pci_0000_01_00_0
@@ -306,10 +306,11 @@ if [ $CHECK -ne 1 ] ; then
 	optimus-manager --switch integrated --no-confirm
 	systemctl stop lightdm.service
 	rmmod nvidia_uvm nvidia_drm nvidia_modeset nvidia
+	echo "1" > /sys/bus/pci/rescan
 	virsh nodedev-detach $VIRSH_GPU_VIDEO
 	virsh nodedev-detach $VIRSH_GPU_AUDIO
 	modprobe vfio vfio_pci vfio_iommu_type1
-	systemctl start lightdm
+	systemctl start lightdm.service
 else
 	echo "1" > /sys/bus/pci/rescan
 	virsh nodedev-detach $VIRSH_GPU_VIDEO
@@ -356,6 +357,8 @@ modprobe -r vfio
 # Re-Bind GPU to Nvidia Driver
 virsh nodedev-reattach $VIRSH_GPU_VIDEO
 virsh nodedev-reattach $VIRSH_GPU_AUDIO
+
+# Restart lightdm with nvidia
 optimus-manager --switch hybrid --no-confirm
 systemctl restart lightdm
 ```
@@ -433,7 +436,7 @@ You need to include these devices in your qemu config.
 
 ```conf
 ...
-user = "root"
+user = "your_username"
 group = "kvm"
 ...
 cgroup_device_acl = [
@@ -965,8 +968,8 @@ XML
 
 ```xml
 ...
-  <memory unit="KiB">23068672</memory>
-  <currentMemory unit="KiB">23068672</currentMemory>
+  <memory unit="KiB">25165824</memory>
+  <currentMemory unit="KiB">25165824</currentMemory>
   <memoryBacking>
     <hugepages/>
   </memoryBacking>
@@ -1017,16 +1020,16 @@ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 </details>
 
 <details>
-  <summary><b>Create CPU Ondemand Script</b></summary>
+  <summary><b>Create CPU Powersave Script</b></summary>
 
 ```sh
-vim /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_ondemand.sh
-chmod +x /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_ondemand.sh
+vim /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_powersave.sh
+chmod +x /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_powersave.sh
 ```
   <table>
   <tr>
   <th>
-    /etc/libvirt/hooks/qemu.d/VM_NAME/release/end/cpu_mode_ondemand.sh
+    /etc/libvirt/hooks/qemu.d/VM_NAME/release/end/cpu_mode_powersave.sh
   </th>
   </tr>
 
@@ -1036,9 +1039,9 @@ chmod +x /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_ondemand.sh
 ```sh
 #!/bin/bash
 
-## Enable CPU governor on-demand mode
+## Enable CPU governor powersave mode
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "ondemand" > $file; done
+for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "powersave" > $file; done
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 ```
 

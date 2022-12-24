@@ -1,10 +1,3 @@
-<!--
-WARNING: THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE
-OVERWRITTEN AND LOST. Changes to this xml configuration should be made using:
-  virsh edit win10
-or other application using the libvirt API.
--->
-
 <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
   <name>win10</name>
   <uuid>6ccd59bf-800b-4114-b59a-ef5730c31210</uuid>
@@ -13,8 +6,8 @@ or other application using the libvirt API.
       <libosinfo:os id="http://microsoft.com/win/10"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory unit='KiB'>23068672</memory>
-  <currentMemory unit='KiB'>23068672</currentMemory>
+  <memory unit='KiB'>25165824</memory>
+  <currentMemory unit='KiB'>25165824</currentMemory>
   <memoryBacking>
     <hugepages/>
   </memoryBacking>
@@ -91,9 +84,6 @@ or other application using the libvirt API.
       <target dev='vdb' bus='virtio'/>
       <address type='pci' domain='0x0000' bus='0x0a' slot='0x00' function='0x0'/>
     </disk>
-    <controller type='usb' index='0' model='qemu-xhci' ports='15'>
-      <address type='pci' domain='0x0000' bus='0x02' slot='0x00' function='0x0'/>
-    </controller>
     <controller type='sata' index='0'>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x1f' function='0x2'/>
     </controller>
@@ -146,10 +136,18 @@ or other application using the libvirt API.
     <controller type='pci' index='10' model='pcie-root-port'>
       <model name='pcie-root-port'/>
       <target chassis='10' port='0x8'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x0' multifunction='on'/>
+    </controller>
+    <controller type='pci' index='11' model='pcie-root-port'>
+      <model name='pcie-root-port'/>
+      <target chassis='11' port='0x9'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x1'/>
     </controller>
     <controller type='virtio-serial' index='0'>
       <address type='pci' domain='0x0000' bus='0x03' slot='0x00' function='0x0'/>
+    </controller>
+    <controller type='usb' index='0' model='qemu-xhci' ports='15'>
+      <address type='pci' domain='0x0000' bus='0x02' slot='0x00' function='0x0'/>
     </controller>
     <interface type='network'>
       <mac address='52:54:00:18:f9:00'/>
@@ -173,7 +171,7 @@ or other application using the libvirt API.
     <input type='keyboard' bus='virtio'>
       <address type='pci' domain='0x0000' bus='0x07' slot='0x00' function='0x0'/>
     </input>
-    <audio id='1' type='spice'/>
+    <audio id='1' type='none'/>
     <hostdev mode='subsystem' type='pci' managed='yes'>
       <source>
         <address domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
@@ -188,24 +186,17 @@ or other application using the libvirt API.
     </hostdev>
     <hostdev mode='subsystem' type='usb' managed='yes'>
       <source>
-        <vendor id='0x04d9'/>
-        <product id='0x2013'/>
+        <vendor id='0x24f0'/>
+        <product id='0x0140'/>
       </source>
-      <address type='usb' bus='0' port='3'/>
+      <address type='usb' bus='0' port='1'/>
     </hostdev>
     <hostdev mode='subsystem' type='usb' managed='yes'>
       <source>
         <vendor id='0x1532'/>
-        <product id='0x0016'/>
+        <product id='0x0099'/>
       </source>
-      <address type='usb' bus='0' port='4'/>
-    </hostdev>
-    <hostdev mode='subsystem' type='usb' managed='yes'>
-      <source>
-        <vendor id='0x045e'/>
-        <product id='0x028e'/>
-      </source>
-      <address type='usb' bus='0' port='1'/>
+      <address type='usb' bus='0' port='2'/>
     </hostdev>
     <memballoon model='virtio'>
       <address type='pci' domain='0x0000' bus='0x05' slot='0x00' function='0x0'/>
@@ -213,9 +204,9 @@ or other application using the libvirt API.
   </devices>
   <qemu:commandline>
     <qemu:arg value='-object'/>
-    <qemu:arg value='input-linux,id=mouse1,evdev=/dev/input/by-id/usb-Razer_Razer_DeathAdder-event-mouse'/>
+    <qemu:arg value='input-linux,id=mouse1,evdev=/dev/input/by-id/usb-Razer_Razer_Basilisk_V3-event-mouse'/>
     <qemu:arg value='-object'/>
-    <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-id/usb-04d9_daskeyboard-event-kbd,grab_all=on,repeat=on'/>
+    <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-id/usb-Metadot_-_Das_Keyboard_Das_Keyboard-event-kbd,grab_all=on,repeat=on'/>
     <qemu:arg value='-device'/>
     <qemu:arg value='ich9-intel-hda,bus=pcie.0,addr=0x1b'/>
     <qemu:arg value='-device'/>
@@ -223,7 +214,7 @@ or other application using the libvirt API.
     <qemu:arg value='-audiodev'/>
     <qemu:arg value='pa,id=hda,server=/run/user/1000/pulse/native'/>
     <qemu:arg value='-acpitable'/>
-    <qemu:arg value='file=/home/fanfan/Public/VM/Lenovo-Legion-5-17ACH6H/acpitable.bin'/>
+    <qemu:arg value='file=/home/fanfan/Public/VM/utils/acpitable.bin'/>
     <qemu:arg value='-rtc'/>
     <qemu:arg value='base=localtime'/>
     <qemu:arg value='-cpu'/>
