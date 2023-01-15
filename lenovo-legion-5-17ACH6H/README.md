@@ -1,6 +1,7 @@
 # Lenovo Legion 5 17ACH6H 
 
 At this time, it "works" but needs a workaround
+
 Many problems :
   - nouveau doesn't support RTX 30xx
   - I need optimus-manager in order to switch between nvidia and intel
@@ -47,6 +48,9 @@ Generate grub.cfg
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 
+When rebooting, go in the BIOS configuration, for the graphics/MUX configuration, I use "Switchable graphics". 
+Yes, even if HDMI and usb-c are only connected to the Nvidia card.
+
 After rebooting, check that the groups are valid.
 ```sh
 for g in `find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V`; do
@@ -69,8 +73,7 @@ IOMMU Group 10:
 ```sh
 pacman -S --needed qemu libvirt edk2-ovmf virt-manager dnsmasq ebtables vim yay linuxxxx-nvidia
 ```
-You can replace iptables with iptables-nft if asked
-linuxxxx-nvidia refers to your kernel version, ex: linux516-nvidia 
+You can replace iptables with iptables-nft if asked. linuxxxx-nvidia refers to your kernel version, ex: linux516-nvidia 
 
 ```sh
 yay -S optimus-manager
@@ -265,8 +268,6 @@ KVM_NAME="YOUR_VM_NAME"
 ```
 
 **If the scripts are not working, use the scripts as template and write your own.**
-
-***Choose the Start/Stop scripts that most closely match your hardware.***
 
 My hardware for this scripts is:
 - *AMD Ryzen 7 5800H with Radeon Graphics*
@@ -637,7 +638,7 @@ XML
 
 ```xml
 ...
-  <vcpu placement='static'>6</vcpu>
+  <vcpu placement='static'>14</vcpu>
   <iothreads>1</iothreads>
   <cputune>
     <vcpupin vcpu="0" cpuset="2"/>
