@@ -43,3 +43,6 @@ How to get good performances in nested virtualization.
 **[Quentin Franchi](https://gitlab.com/dev.quentinfranchi/vfio)**  
 The scripts for AMD GPUs.
 
+**[Nikolaos Karaolidis](https://blog.karaolidis.com/vfio/)**
+A more specific Lenovo Legion POC with looking-glass
+

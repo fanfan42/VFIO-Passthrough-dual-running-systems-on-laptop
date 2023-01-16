@@ -9,6 +9,8 @@ Many problems :
 
 After all configuration is finished, when you restart your PC, you may notice that your Nvidia card has disappeared from your lspci, nvidia isn't loaded and your second monitor isn't used by Manjaro, that's normal. Start the VM. Stop the VM. Nvidia is bound. You can now start/stop your VM as musch as you want but for each start/stop action, lightdm will restart
 
+Little update, I can now autologin when lightdm restarts and still have to enter my password when rebooting the host, that spares some time
+
 ### **Table Of Contents**
 - [**Enable & Verify IOMMU**](#enable-verify-iommu)
 - [**Install required tools**](#install-required-tools)
@@ -30,8 +32,8 @@ After all configuration is finished, when you restart your PC, you may notice th
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
 - [**Windows drivers**](#windows-drivers)
-- [**Enable Hyper-V**](#enable-hyper-v)
 - [**Optimize Windows**](#optimize-windows)
+- [**Enable Hyper-V**](#enable-hyper-v)
 
 ### **Enable & Verify IOMMU**
 
@@ -79,6 +81,11 @@ You can replace iptables with iptables-nft if asked. linuxxxx-nvidia refers to y
 yay -S optimus-manager
 ```
 
+Add yourself in the libvirt group so you can access to virt-manager without admin permission and autologin if you want to autologin when lightdm restarts :
+```sh
+sudo usermod -aG libvirt,autologin your_username
+```
+
 ### **Configure optimus-manager**
 in /usr/share/optimus-manager.conf :
 ```sh
@@ -115,10 +122,12 @@ Download [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloa
 
 Create your storage volume with the ***raw*** format. Select ***Customize before install*** on Final Step. 
 
-| In Overview                  |
-|:-----------------------------|
-| set **Chipset** to **Q35**   |
-| set **Firmware** to **UEFI** |
+| In Overview                                                                |
+|:---------------------------------------------------------------------------|
+| set **Chipset** to **Q35**                                                 |
+| set **Firmware** to **UEFI x86_64: /usr/share/edk2-ovmf/x64/OVMF_CODE.fd** |
+
+WARNING: Click on "Apply" each time you switch panels in virt-manager
 
 | In CPUs                                              |
 |:-----------------------------------------------------|
@@ -160,7 +169,8 @@ The devices you want to passthrough.
 | `Display spice` |
 | `Channel spice` |
 | `Video QXL`     |
-| `Sound ich*`    |
+| `Tablet`        |
+| `USB redirect *`|
 
 ### **Libvirt Hook Helper**
 
@@ -191,7 +201,7 @@ chmod +x /etc/libvirt/hooks/qemu
 #!/bin/bash
 #
 # Author: Sebastiaan Meijer (sebastiaan@passthroughpo.st)
-#
+# https://raw.githubusercontent.com/PassthroughPOST/VFIO-Tools/master/libvirt_hooks/qemu
 
 GUEST_NAME="$1"
 HOOK_NAME="$2"
@@ -302,6 +312,15 @@ source "/etc/libvirt/hooks/kvm.conf"
 lsmod | grep nvidia
 CHECK=$?
 
+# Isolate host
+# Mostly if kernel ACS patching 
+systemctl set-property --runtime -- user.slice AllowedCPUs=0,1
+systemctl set-property --runtime -- system.slice AllowedCPUs=0,1
+systemctl set-property --runtime -- init.scope AllowedCPUs=0,1
+
+# Uncomment autologin lines in /etc/lightdm/lightdm.conf
+sed -i 's/^#autologin-user=/autologin-user=your_username/' /etc/lightdm/lightdm.conf
+
 # Stop display manager
 if [ $CHECK -ne 1 ] ; then
 	optimus-manager --switch integrated --no-confirm
@@ -350,6 +369,11 @@ set -x
 # Load variables
 source "/etc/libvirt/hooks/kvm.conf"
 
+# Deisolate host
+systemctl set-property --runtime -- user.slice AllowedCPUs=0-15
+systemctl set-property --runtime -- system.slice AllowedCPUs=0-15
+systemctl set-property --runtime -- init.scope AllowedCPUs=0-15
+
 # Unload VFIO-PCI Kernel Driver
 modprobe -r vfio_pci
 modprobe -r vfio_iommu_type1
@@ -362,6 +386,11 @@ virsh nodedev-reattach $VIRSH_GPU_AUDIO
 # Restart lightdm with nvidia
 optimus-manager --switch hybrid --no-confirm
 systemctl restart lightdm
+
+sleep 2
+
+# Comment out autologin lines in /etc/lightdm/lightdm.conf
+sed -i 's/^autologin-user=your_username/#autologin-user=/' /etc/lightdm/lightdm.conf
 ```
 
   </td>
@@ -423,7 +452,7 @@ XML
 </tr>
 </table>
 
-You need to include these devices in your qemu config.
+Dont forget to make your first "Apply" to save the conf and keep the first line of the file. You need to include these devices in your qemu config.
 
 <table>
 <tr>
@@ -500,16 +529,18 @@ XML
 
 ```xml
 ...
-  <qemu:commandline>
+  <devices>
     ...
-    <qemu:arg value="-device"/>
-    <qemu:arg value="ich9-intel-hda,bus=pcie.0,addr=0x1b"/>
-    <qemu:arg value="-device"/>
-    <qemu:arg value="hda-micro,audiodev=hda"/>
-    <qemu:arg value="-audiodev"/>
-    <qemu:arg value="pa,id=hda,server=/run/user/1000/pulse/native"/>
-  </qemu:commandline>
-</devices>
+    <sound model="ich9">
+      <audio id="1"/>
+      ...
+    </sound>
+    <audio id="1" type="pulseaudio" serverName="/run/user/1000/pulse/native">
+      <input mixingEngine="no"/>
+      <output mixingEngine="no"/>
+    </audio>
+    ...
+  </devices>
 ```
 
 </td>
@@ -519,6 +550,7 @@ XML
 ### **Video card driver virtualisation detection**
 
 Video Card drivers refuse to run in Virtual Machine, so you need to spoof Hyper-V Vendor ID.
+More information on the options configured [here](https://libvirt.org/formatdomain.html#elementsFeatures)
 
 <table>
 <tr>
@@ -532,15 +564,16 @@ XML
 
 ```xml
 ...
-<features>
-  ...
-  <hyperv>
+  <features>
+    <acpi/>
+    <apic/>
+    <hyperv mode="custom">
+      ...
+      <vendor_id state="on" value="deadbeef"/>
+      ...
+    </hyperv>
     ...
-    <vendor_id state='on' value='deadbeef'/>
-    ...
-  </hyperv>
-  ...
-</features>
+  </features>
 ...
 ```
 
@@ -568,7 +601,7 @@ XML
     <hidden state='on'/>
   </kvm>
   <ioapic driver="kvm"/>
-  ...
+  <vmport state="off"/>
 </features>
 ...
 ```
@@ -788,7 +821,7 @@ XML
     <qemu:arg value="-rtc"/>
     <qemu:arg value="base=localtime"/>
     <qemu:arg value="-cpu"/>
-    <qemu:arg value="host,host-cache-info=on,kvm=off,l3-cache=on,kvm-hint-dedicated=on,migratable=no,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_vendor_id=deadbeef,+invtsc,+topoext"/>
+    <qemu:arg value="host,host-cache-info=on,kvm=off,l3-cache=on,kvm-hint-dedicated=on,migratable=no,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_vendor_id=deadbeef,hv_vendor_id=AMD,+invtsc,+topoext"/>
   </qemu:commandline>
 </devices>
 ```
@@ -1057,17 +1090,6 @@ To get the *network*, *sound*, *mouse* and *keyboard* working properly you need 
 
 In `Device Manager` update *network*, *sound*, *mouse* and *keyboard* drivers with the local virtio iso `/path/to/virtio-driver`.
 
-### **Enable Hyper-V**
-
-Enable Hyper-V using PowerShell:
-
-```powershell
-Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
-```
-
-Enable the Hyper-V through Settings:
-
-Search for `Turn Windows Features on or off`, select **Hyper-V** and click **Ok**.
 
 ### **Optimize Windows**
 
@@ -1085,3 +1107,17 @@ In *Windows Settings*:
 If you have and NVIDIA card, in *NVIDIA Control Panel*:
 - set ***Texture filtering quality*** to ***High performance***
 - set ***Power management mode*** to ***Max performance***
+
+### **Enable Hyper-V**
+
+Warning: I can't install it anymore, it ends with an infinite loop at boot time leading to try a recovery install. I you want to try, I recommand you to make a copy of your img/qcow2 file.
+
+Enable Hyper-V using PowerShell:
+
+```powershell
+Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+```
+
+Enable the Hyper-V through Settings:
+
+Search for `Turn Windows Features on or off`, select **Hyper-V** and click **Ok**.
