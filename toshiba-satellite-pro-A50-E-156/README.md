@@ -26,7 +26,9 @@ This mode cannot allow to play high-end graphics games but I can still play AOE 
 
 Ensure that ***Intel VT-d*** is supported by the CPU and enabled in the BIOS settings.
 
-Enable IOMMU and intel gvt-gsupport by setting the kernel parameters
+Also, in Advanced -> System Configuration -> Large aperture graphics -> enabled . This is for using the maximum types of mdev
+
+Enable IOMMU and intel gvt-g support by setting the kernel parameters
 
 | /etc/default/grub                                              |
 |----------------------------------------------------------------|
@@ -86,10 +88,10 @@ Download [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloa
 
 Create your storage volume with the ***raw*** format. Select ***Customize before install*** on Final Step. 
 
-| In Overview                  |
-|:-----------------------------|
-| set **Chipset** to **Q35**   |
-| set **Firmware** to **UEFI** |
+| In Overview                                                                |
+|:---------------------------------------------------------------------------|
+| set **Chipset** to **Q35**                                                 |
+| set **Firmware** to **UEFI x86_64: /usr/share/edk2-ovmf/x64/OVMF_CODE.fd** |
 
 | In CPUs                                              |
 |:-----------------------------------------------------|
@@ -122,14 +124,14 @@ in a terminal :
 
 ```sh
 ls /sys/devices/pci/0000\:00\:02.0/mdev_supported_types
-i915-GVTg_V5_1  # Video memory: <512MB, 2048MB>, resolution: up to 1920x1200
-i915-GVTg_V5_2  # Video memory: <256MB, 1024MB>, resolution: up to 1920x1200
+i915-GVTg_V5_1  # Video memory: <512MB, 2048MB>, resolution: up to 1920x1200, this mode only appears if Large aperture graphics in BIOS is enabled
+i915-GVTg_V5_2  # Video memory: <256MB, 1024MB>, resolution: up to 1920x1200, this mode only appears if Large aperture graphics in BIOS is enabled
 i915-GVTg_V5_4  # Video memory: <128MB, 512MB>, resolution: up to 1920x1200
 i915-GVTg_V5_8  # Video memory: <64MB, 384MB>, resolution: up to 1024x768
 
 sudo -s
 # uuidgen
-echo 46d7d7e9-d914-46f4-b3d8-c5a8cd2e0541 > /sys/bus/pci/devices/0000\:00\:02.0/mdev_supported_types/i915-GVTg_V5_4/create
+echo 46d7d7e9-d914-46f4-b3d8-c5a8cd2e0541 > /sys/bus/pci/devices/0000\:00\:02.0/mdev_supported_types/i915-GVTg_V5_1/create
 ```
 
 The devices you want to passthrough.
@@ -151,7 +153,8 @@ The devices you want to passthrough.
 | `Display spice` |
 | `Channel spice` |
 | `Video QXL`     |
-| `Sound ich*`    |
+| `Tablet`        |
+| `USB redirect *`|
 
 ### **Libvirt Hook Helper**
 
@@ -235,8 +238,9 @@ vim /etc/libvirt/hooks/kvm.conf
 # CONFIG
 VM_MEMORY=12288
 
-GVT_GUID=46d7d7e9-d914-46f4-b3d8-c5a8cd2e0541
-MDEV_TYPE=i915-GVTg_V5_4
+GVT_GUID=65e0c490-1f9f-47e2-87b4-3f3d14255b2f
+MDEV_TYPE=i915-GVTg_V5_1
+GVT_PCI=0000:00:02.0
 ```
 
 </td>
@@ -254,8 +258,6 @@ KVM_NAME="YOUR_VM_NAME"
 ```
 
 **If the scripts are not working, use the scripts as template and write your own.**
-
-***Choose the Start/Stop scripts that most closely match your hardware.***
 
 My hardware for this scripts is:
 - *Intel(R) Core(TM) i7-8550U CPU @ 1.80GHz*
@@ -286,7 +288,12 @@ set -x
 # Load variables
 source "/etc/libvirt/hooks/kvm.conf"
 
-echo "$GVT_GUID" | pkexec tee "/sys/bus/pci/devices/$GVT_PCI/mdev_supported_types/$MDEV_TYPE/create"
+# Isolate host
+systemctl set-property --runtime -- user.slice AllowedCPUs=0,4
+systemctl set-property --runtime -- system.slice AllowedCPUs=0,4
+systemctl set-property --runtime -- init.scope AllowedCPUs=0,4
+
+echo "$GVT_GUID" > "/sys/bus/pci/devices/$GVT_PCI/mdev_supported_types/$MDEV_TYPE/create"
 ```
 
   </td>
@@ -319,7 +326,12 @@ set -x
 # Load variables
 source "/etc/libvirt/hooks/kvm.conf"
 
-echo 1 | pkexec tee "/sys/bus/pci/devices/$GVT_PCI/$GVT_GUID/remove"
+# Deisolate host
+systemctl set-property --runtime -- user.slice AllowedCPUs=0-7
+systemctl set-property --runtime -- system.slice AllowedCPUs=0-7
+systemctl set-property --runtime -- init.scope AllowedCPUs=0-7
+
+echo 1 > "/sys/bus/pci/devices/$GVT_PCI/$GVT_GUID/remove"
 ```
 
   </td>
@@ -329,7 +341,7 @@ echo 1 | pkexec tee "/sys/bus/pci/devices/$GVT_PCI/$GVT_GUID/remove"
 
 ### **Keyboard/Mouse Passthrough**
 
-Change the first line of the xml to:
+Change the first line of the xml to (Don't apply the xml before the next add):
 
 <table>
 <tr>
@@ -351,7 +363,7 @@ XML
 
 Add yourself in the input group :
 ```sh
-usermod -a -G input yourself
+usermod -aG input your_username
 ```
 Find your mouse device in ***/dev/input/by-id***. You'd generally use the devices ending with ***event-mouse***. And the devices in your configuration right before closing `</domain>` tag.
 
@@ -381,6 +393,8 @@ XML
 </td>
 </tr>
 </table>
+At this time. you can apply the xml file. From now, apply each time the xml is changed.
+
 Add yourself in the KVM group:
 ```sh
 usermod -a -G kvm yourself
@@ -399,7 +413,7 @@ You need to include these devices in your qemu config.
 
 ```conf
 ...
-user = "yourself"
+user = "your_username"
 group = "kvm"
 ...
 cgroup_device_acl = [
@@ -460,16 +474,18 @@ XML
 
 ```xml
 ...
-  <qemu:commandline>
+    <devices>
     ...
-    <qemu:arg value="-device"/>
-    <qemu:arg value="ich9-intel-hda,bus=pcie.0,addr=0x1b"/>
-    <qemu:arg value="-device"/>
-    <qemu:arg value="hda-micro,audiodev=hda"/>
-    <qemu:arg value="-audiodev"/>
-    <qemu:arg value="pa,id=hda,server=/run/user/1000/pulse/native"/>
-  </qemu:commandline>
-</devices>
+    <sound model="ich9">
+      <audio id="1"/>
+      ...
+    </sound>
+    <audio id="1" type="pulseaudio" serverName="/run/user/1000/pulse/native">
+      <input mixingEngine="no"/>
+      <output mixingEngine="no"/>
+    </audio>
+    ...
+  </devices>
 ```
 
 </td>
@@ -911,16 +927,16 @@ cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 </details>
 
 <details>
-  <summary><b>Create CPU Ondemand Script</b></summary>
+  <summary><b>Create CPU Powersave Script</b></summary>
 
 ```sh
-vim /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_ondemand.sh
-chmod +x /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_ondemand.sh
+vim /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_powersave.sh
+chmod +x /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_powersave.sh
 ```
   <table>
   <tr>
   <th>
-    /etc/libvirt/hooks/qemu.d/VM_NAME/release/end/cpu_mode_ondemand.sh
+    /etc/libvirt/hooks/qemu.d/VM_NAME/release/end/cpu_mode_powersave.sh
   </th>
   </tr>
 
@@ -930,7 +946,7 @@ chmod +x /etc/libvirt/hooks/qemu.d/$KVM_NAME/release/end/cpu_mode_ondemand.sh
 ```sh
 #!/bin/bash
 
-## Enable CPU governor on-demand mode
+## Enable CPU governor powersave mode
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo "powersave" > $file; done
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor

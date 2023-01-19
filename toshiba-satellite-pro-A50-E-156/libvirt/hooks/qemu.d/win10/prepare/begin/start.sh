@@ -5,4 +5,9 @@ set -x
 # Load variables
 source "/etc/libvirt/hooks/kvm.conf"
 
-echo "$GVT_GUID" | pkexec tee "/sys/bus/pci/devices/$GVT_PCI/mdev_supported_types/$MDEV_TYPE/create"
+# Isolate host
+systemctl set-property --runtime -- user.slice AllowedCPUs=0,4
+systemctl set-property --runtime -- system.slice AllowedCPUs=0,4
+systemctl set-property --runtime -- init.scope AllowedCPUs=0,4
+
+echo "$GVT_GUID" > "/sys/bus/pci/devices/$GVT_PCI/mdev_supported_types/$MDEV_TYPE/create"
