@@ -400,7 +400,7 @@ sed -i 's/^autologin-user=your_username/#autologin-user=/' /etc/lightdm/lightdm.
 
 ### **Keyboard/Mouse Passthrough**
 
-Change the first line of the xml to:
+Change the first line of the xml to (Don't apply the xml before the next add):
 
 <table>
 <tr>
@@ -452,7 +452,14 @@ XML
 </tr>
 </table>
 
-Dont forget to make your first "Apply" to save the conf and keep the first line of the file. You need to include these devices in your qemu config.
+At this time. you can apply the xml file. From now, apply each time the xml is changed.
+
+Add yourself in the KVM group:
+```sh
+usermod -a -G kvm yourself
+```
+
+You need to include these devices in your qemu config.
 
 <table>
 <tr>
