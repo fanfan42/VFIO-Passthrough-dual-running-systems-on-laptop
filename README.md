@@ -7,8 +7,9 @@ Dual GPU PC :
 - Lenovo Legion Y540-15IRH (with nvidia GTX 1660Ti, intel core i5 8 cores, 16GB RAM)
 - Lenovo Legion 5 17ACH6H (with nvidia RTX 3060, amd ryzen 7 16 cores, 32GB RAM)
 
-Single GPU PC (intel, only from 6th to 9th generation):
+Single GPU PC (intel, only from 6th to 10th generation):
 - Lenovo Thinkpad E490 (intel i5 8th generation 8 cores, 16GB RAM)
+- Lenovo Thinpad L14 Gen 1 (intel i5 10th generation 8 cores, 16 GB RAM)
 - Toshiba Satellite Pro A50-E-156 (intel i7 8th generation 8 cores, 16GB RAM)
 
 The base OS used on the host is Manjaro (Mate)
@@ -43,6 +44,6 @@ How to get good performances in nested virtualization.
 **[Quentin Franchi](https://gitlab.com/dev.quentinfranchi/vfio)**  
 The scripts for AMD GPUs.
 
-**[Nikolaos Karaolidis](https://blog.karaolidis.com/vfio/)**
+**[Nikolaos Karaolidis](https://blog.karaolidis.com/vfio/)**  
 A more specific Lenovo Legion POC with looking-glass
 
