@@ -1,6 +1,13 @@
+<!--
+WARNING: THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE
+OVERWRITTEN AND LOST. Changes to this xml configuration should be made using:
+  virsh edit gam10lg
+or other application using the libvirt API.
+-->
+
 <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-  <name>win10</name>
-  <uuid>5c925da8-e841-41bd-9c99-f1640fa254e9</uuid>
+  <name>gam10lg</name>
+  <uuid>660261a3-6950-4753-9ad7-f738265f51aa</uuid>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
       <libosinfo:os id="http://microsoft.com/win/10"/>
@@ -32,9 +39,9 @@
     <iothreadpin iothread='1' cpuset='0-1'/>
   </cputune>
   <os>
-    <type arch='x86_64' machine='pc-q35-6.2'>hvm</type>
+    <type arch='x86_64' machine='pc-q35-7.2'>hvm</type>
     <loader readonly='yes' type='pflash'>/usr/share/edk2/x64/OVMF_CODE.fd</loader>
-    <nvram>/var/lib/libvirt/qemu/nvram/win10_VARS.fd</nvram>
+    <nvram>/var/lib/libvirt/qemu/nvram/gam10lg_VARS.fd</nvram>
   </os>
   <features>
     <acpi/>
@@ -73,7 +80,7 @@
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='raw' cache='none' io='threads' discard='unmap' iothread='1' queues='14'/>
-      <source file='/home/fanfan/Public/VM/windowsamdgaming.img'/>
+      <source file='/home/fanfan/Public/VM/gam10.img'/>
       <target dev='vda' bus='virtio'/>
       <boot order='1'/>
       <address type='pci' domain='0x0000' bus='0x04' slot='0x00' function='0x0'/>
@@ -158,6 +165,15 @@
       <target chassis='14' port='0x1d'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x5'/>
     </controller>
+    <controller type='pci' index='15' model='pcie-root-port'>
+      <model name='pcie-root-port'/>
+      <target chassis='15' port='0x8'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x01' function='0x0'/>
+    </controller>
+    <controller type='pci' index='16' model='pcie-to-pci-bridge'>
+      <model name='pcie-pci-bridge'/>
+      <address type='pci' domain='0x0000' bus='0x09' slot='0x00' function='0x0'/>
+    </controller>
     <controller type='sata' index='0'>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x1f' function='0x2'/>
     </controller>
@@ -183,10 +199,12 @@
     <input type='mouse' bus='virtio'>
       <address type='pci' domain='0x0000' bus='0x08' slot='0x00' function='0x0'/>
     </input>
-    <input type='keyboard' bus='virtio'>
-      <address type='pci' domain='0x0000' bus='0x09' slot='0x00' function='0x0'/>
-    </input>
+    <graphics type='spice' autoport='yes'>
+      <listen type='address'/>
+      <image compression='off'/>
+    </graphics>
     <sound model='ich9'>
+      <codec type='micro'/>
       <audio id='1'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x1b' function='0x0'/>
     </sound>
@@ -194,6 +212,9 @@
       <input mixingEngine='no'/>
       <output mixingEngine='no'/>
     </audio>
+    <video>
+      <model type='none'/>
+    </video>
     <hostdev mode='subsystem' type='pci' managed='yes'>
       <source>
         <address domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
@@ -209,12 +230,15 @@
     <memballoon model='virtio'>
       <address type='pci' domain='0x0000' bus='0x05' slot='0x00' function='0x0'/>
     </memballoon>
+    <shmem name='looking-glass'>
+      <model type='ivshmem-plain'/>
+      <size unit='M'>64</size>
+      <address type='pci' domain='0x0000' bus='0x10' slot='0x01' function='0x0'/>
+    </shmem>
   </devices>
   <qemu:commandline>
     <qemu:arg value='-object'/>
     <qemu:arg value='input-linux,id=mouse1,evdev=/dev/input/by-id/usb-Razer_Razer_Basilisk_V3-event-mouse'/>
-    <qemu:arg value='-object'/>
-    <qemu:arg value='input-linux,id=kbd1,evdev=/dev/input/by-id/usb-Metadot_-_Das_Keyboard_Das_Keyboard-event-kbd,grab_all=on,repeat=on'/>
     <qemu:arg value='-acpitable'/>
     <qemu:arg value='file=/home/fanfan/Public/VM/utils/acpitable.bin'/>
     <qemu:arg value='-rtc'/>

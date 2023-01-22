@@ -9,7 +9,9 @@ Many problems :
 
 After all configuration is finished, when you restart your PC, you may notice that your Nvidia card has disappeared from your lspci, nvidia isn't loaded and your second monitor isn't used by Manjaro, that's normal. Start the VM. Stop the VM. Nvidia is bound. You can now start/stop your VM as musch as you want but for each start/stop action, lightdm will restart
 
-Little update, I can now autologin when lightdm restarts and still have to enter my password when rebooting the host, that spares some time
+EDIT 1 : I can now autologin when lightdm restarts and still have to enter my password when rebooting the host, that spares some time
+
+EDIT 2 : I created a new VM based on the same img file as this example (see the files in libvirt folder). On the top of it, I install Looking-glass when I don't have a second monitor. This is not a recommended step for performance. In facts, that doesn't give great performance. That's only for single monitor configuration
 
 ### **Table Of Contents**
 - [**Enable & Verify IOMMU**](#enable-verify-iommu)
@@ -34,6 +36,7 @@ Little update, I can now autologin when lightdm restarts and still have to enter
 - [**Windows drivers**](#windows-drivers)
 - [**Optimize Windows**](#optimize-windows)
 - [**Enable Hyper-V**](#enable-hyper-v)
+- [**Install looking-glass**](#install-looking-glass)
 
 ### **Enable & Verify IOMMU**
 
@@ -318,6 +321,10 @@ systemctl set-property --runtime -- user.slice AllowedCPUs=0,1
 systemctl set-property --runtime -- system.slice AllowedCPUs=0,1
 systemctl set-property --runtime -- init.scope AllowedCPUs=0,1
 
+# OPTIONAL: Only if you want looking glass last install step
+# Create looking glass shm
+systemd-tmpfiles --create /etc/tmpfiles.d/10-looking-glass.conf
+
 # Uncomment autologin lines in /etc/lightdm/lightdm.conf
 sed -i 's/^#autologin-user=/autologin-user=your_username/' /etc/lightdm/lightdm.conf
 
@@ -389,6 +396,10 @@ systemctl restart lightdm
 
 sleep 2
 
+# OPTIONAL : Only if you install looking-glass in the last step
+# Delete looking glass shm
+rm /dev/shm/looking-glass
+
 # Comment out autologin lines in /etc/lightdm/lightdm.conf
 sed -i 's/^autologin-user=your_username/#autologin-user=/' /etc/lightdm/lightdm.conf
 ```
@@ -419,6 +430,8 @@ XML
 </td>
 </tr>
 </table>
+
+Note: I don't passtrough the keyboard in case of looking-glass usage
 
 Find your keyboard and mouse devices in ***/dev/input/by-id***. You'd generally use the devices ending with ***event-kbd*** and ***event-mouse***. And the devices in your configuration right before closing `</domain>` tag.
 
@@ -456,7 +469,7 @@ At this time. you can apply the xml file. From now, apply each time the xml is c
 
 Add yourself in the KVM group:
 ```sh
-usermod -a -G kvm yourself
+usermod -aG kvm your_username
 ```
 
 You need to include these devices in your qemu config.
@@ -520,7 +533,7 @@ XML
 
 ### **Audio Passthrough**
 
-This section is only useful if you intend to use the audio output from your GPU. If not, in [Attaching PCI devices](#attaching-pci-devices) add your **Audio Controller** in `Add PCI Host Device`.
+This section is only useful if you use the looking-glass client. If not, in [Attaching PCI devices](#attaching-pci-devices) add your **Audio Controller** in `Add PCI Host Device`. 
 
 VM's audio can be routed to the host. You need **Pulseaudio** (or **Pipewire** with *pipewire-pulse*).
 
@@ -1117,7 +1130,7 @@ If you have and NVIDIA card, in *NVIDIA Control Panel*:
 
 ### **Enable Hyper-V**
 
-Warning: I can't install it anymore, it ends with an infinite loop at boot time leading to try a recovery install. I you want to try, I recommand you to make a copy of your img/qcow2 file.
+Warning: I can't install it anymore, it ends with an infinite loop at boot time leading to try a recovery install. If you want to try, I recommend you to make a copy of your img/qcow2 file.
 
 Enable Hyper-V using PowerShell:
 
@@ -1128,3 +1141,112 @@ Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
 Enable the Hyper-V through Settings:
 
 Search for `Turn Windows Features on or off`, select **Hyper-V** and click **Ok**.
+
+### **Install looking-glass**
+
+This part of the tutorial is only if you can't play with a second monitor or if you want to have the 2 options in all case. In my case, I created another Guest (VM) based on the previously created. I copied the XML file, changed the name, the uuid and the nvram file (See my XML examples on this repository). The new VM still uses the same IMG file for booting the Windows system so be careful to not start the 2 VM, that could breaks all your install.
+
+First of all, you will need a dummy HDMI plug or you wont see anything in the looking-glass client. It costs less than 10 bucks on Internet.
+
+Start the previously created Guest, install the latest [Guest application](https://looking-glass.io/downloads) on your Windows. At this time, I installed the B6 version. Stop the Guest
+
+On the host, create the tmp configuration file :
+
+<details>
+  <summary><b>Create Looking-glass tmp file</b></summary>
+
+```sh
+vim /etc/tmpfiles.d/10-looking-glass.conf
+```
+  <table>
+  <tr>
+  <th>
+    /etc/tmpfiles.d/10-looking-glass.conf
+  </th>
+  </tr>
+
+  <tr>
+  <td>
+
+```sh
+f	/dev/shm/looking-glass	0666	root	libvirt	-
+```
+
+  </td>
+  </tr>
+  </table>
+</details>
+
+On the XML file of the Guest, add these lines to create a shared memory area for looking-glass
+
+<table>
+<tr>
+<th>
+XML
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<devices>
+  ...
+  <shmem name="looking-glass">
+    <model type="ivshmem-plain"/>
+    <size unit="M">64</size>
+     <address type="pci" domain="0x0000" bus="0x10" slot="0x01" function="0x0"/>
+  </shmem>
+</devices>
+
+```
+
+</td>
+</tr>
+</table>
+
+Normally, if you followed all the tutorial, at this point you shouldn't have any graphics on libvirt, add these lines to the XML file in libvirt :
+
+<table>
+<tr>
+<th>
+XML
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<devices>
+  ...
+  <graphics type="spice" autoport="yes">
+    <listen type="address"/>
+    <image compression="off"/>
+  </graphics>
+  <video>
+    <model type="none"/>
+  </video>
+  ...
+</devices>
+
+```
+</td>
+</tr>
+</table>
+
+Still on the Host, install looking-glass client :
+
+```sh
+yay -S looking-glass-git
+```
+
+You can now plug the dummy HDMI plug and start the VM, in the terminal, to access the Windows Guest, type the following command, it will launch looking-glass and your VM should be running (no need to be root) :
+
+```sh
+looking-glass-client -F
+```
+
+Have fun !
