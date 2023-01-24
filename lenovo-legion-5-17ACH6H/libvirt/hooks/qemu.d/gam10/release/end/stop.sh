@@ -18,11 +18,12 @@ modprobe -r vfio
 virsh nodedev-reattach $VIRSH_GPU_VIDEO
 virsh nodedev-reattach $VIRSH_GPU_AUDIO
 
+# Avoid race condition
+sleep 2
+
 # Restart lightdm with nvidia
 optimus-manager --switch hybrid --no-confirm
 systemctl restart lightdm
-
-sleep 2
 
 # Comment out autologin lines in /etc/lightdm/lightdm.conf
 sed -i 's/^autologin-user=your_username/#autologin-user=/' /etc/lightdm/lightdm.conf

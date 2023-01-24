@@ -18,11 +18,12 @@ modprobe -r vfio
 virsh nodedev-reattach $VIRSH_GPU_VIDEO
 virsh nodedev-reattach $VIRSH_GPU_AUDIO
 
+# Avoid race condition
+sleep 2
+
 # Restart lightdm with nvidia
 optimus-manager --switch hybrid --no-confirm
 systemctl restart lightdm
-
-sleep 2
 
 # OPTIONAL : Only if you install looking-glass in the last step
 # Delete looking glass shm
