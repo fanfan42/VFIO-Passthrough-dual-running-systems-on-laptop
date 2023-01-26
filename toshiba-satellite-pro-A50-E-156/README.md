@@ -17,6 +17,7 @@ This mode cannot allow to play high-end graphics games but I can still play AOE 
 - [**CPU Pinning**](#cpu-pinning)
 - [**Disk Tuning**](#disk-tuning)
 - [**Hyper-V Enlightenments and others**](#hyper-v-enlightenments-and-others)
+- [**Disable Memballoon](#disable-memballoon)
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
 - [**Windows drivers**](#windows-drivers)
@@ -775,6 +776,16 @@ You have to make `queues` correspond to the number of ***vcpus*** you pass to th
 </table>
 
 For virtio-scsi, follow [bryansteiner](https://github.com/bryansteiner/gpu-passthrough-tutorial/#----disk-tuning) tutorial.
+
+### **Disable Memballoon**
+
+The VirtIO memballoon device allows the host to reclaim memory from a running VM. However, this functionality comes at a performance cost, so you can disable it by editing the <memballoon> tag in your XML like so:
+
+```xml
+...
+    <memballoon model="none"/>
+...
+```
 
 ### **Hugepages**
 

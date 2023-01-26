@@ -1,10 +1,3 @@
-<!--
-WARNING: THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE
-OVERWRITTEN AND LOST. Changes to this xml configuration should be made using:
-  virsh edit gam10lg
-or other application using the libvirt API.
--->
-
 <domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
   <name>gam10lg</name>
   <uuid>660261a3-6950-4753-9ad7-f738265f51aa</uuid>
@@ -224,9 +217,7 @@ or other application using the libvirt API.
       </source>
       <address type='pci' domain='0x0000' bus='0x07' slot='0x00' function='0x0'/>
     </hostdev>
-    <memballoon model='virtio'>
-      <address type='pci' domain='0x0000' bus='0x05' slot='0x00' function='0x0'/>
-    </memballoon>
+    <memballoon model='none'/>
     <shmem name='looking-glass'>
       <model type='ivshmem-plain'/>
       <size unit='M'>64</size>

@@ -30,6 +30,7 @@ EDIT 2 : I created a new VM based on the same img file as this example (see the 
 - [**CPU Pinning**](#cpu-pinning)
 - [**Hyper-V Enlightenments**](#hyper-v-enlightenments)
 - [**Disk Tuning**](#disk-tuning)
+- [**Disable Memballoon](#disable-memballoon)
 - [**Only laptop with Nvidia card Tuning**](#only-laptop-with-nvidia-card-tuning)
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
@@ -889,6 +890,16 @@ You have to make `queues` correspond to the number of ***vcpus*** you pass to th
 </table>
 
 For virtio-scsi, follow [bryansteiner](https://github.com/bryansteiner/gpu-passthrough-tutorial/#----disk-tuning) tutorial.
+
+### **Disable Memballoon**
+
+The VirtIO memballoon device allows the host to reclaim memory from a running VM. However, this functionality comes at a performance cost, so you can disable it by editing the <memballoon> tag in your XML like so:
+
+```xml
+...
+    <memballoon model="none"/>
+...
+```
 
 ### **Only laptop with Nvidia card Tuning**
 
