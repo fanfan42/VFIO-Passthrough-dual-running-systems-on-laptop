@@ -196,9 +196,6 @@ or other application using the libvirt API.
     </console>
     <input type='mouse' bus='ps2'/>
     <input type='keyboard' bus='ps2'/>
-    <input type='mouse' bus='virtio'>
-      <address type='pci' domain='0x0000' bus='0x08' slot='0x00' function='0x0'/>
-    </input>
     <graphics type='spice' autoport='yes'>
       <listen type='address'/>
       <image compression='off'/>
@@ -237,8 +234,6 @@ or other application using the libvirt API.
     </shmem>
   </devices>
   <qemu:commandline>
-    <qemu:arg value='-object'/>
-    <qemu:arg value='input-linux,id=mouse1,evdev=/dev/input/by-id/usb-Razer_Razer_Basilisk_V3-event-mouse'/>
     <qemu:arg value='-acpitable'/>
     <qemu:arg value='file=/home/fanfan/Public/VM/utils/acpitable.bin'/>
     <qemu:arg value='-rtc'/>

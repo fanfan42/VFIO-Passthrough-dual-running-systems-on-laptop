@@ -432,7 +432,7 @@ XML
 </tr>
 </table>
 
-Note: I don't passtrough the keyboard in case of looking-glass usage
+Note: I don't passtrough the keyboard and mouse in case of looking-glass usage. It will be managed by Spice
 
 Find your keyboard and mouse devices in ***/dev/input/by-id***. You'd generally use the devices ending with ***event-kbd*** and ***event-mouse***. And the devices in your configuration right before closing `</domain>` tag.
 
@@ -1247,7 +1247,8 @@ yay -S looking-glass-git
 You can now plug the dummy HDMI plug and start the VM, in the terminal, to access the Windows Guest, type the following command, it will launch looking-glass and your VM should be running (no need to be root) :
 
 ```sh
-looking-glass-client -F
+# 97 is for rightCtrl key - sudo showkey  --keycodes 
+looking-glass-client -m 97 -F input:grabKeyboardOnFocus input:rawMouse input:autoCapture
 ```
 
 Have fun !
