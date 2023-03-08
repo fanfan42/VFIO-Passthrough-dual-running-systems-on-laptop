@@ -30,7 +30,7 @@ EDIT 2 : I created a new VM based on the same img file as this example (see the 
 - [**CPU Pinning**](#cpu-pinning)
 - [**Hyper-V Enlightenments**](#hyper-v-enlightenments)
 - [**Disk Tuning**](#disk-tuning)
-- [**Disable Memballoon](#disable-memballoon)
+- [**Disable Memballoon**](#disable-memballoon)
 - [**Only laptop with Nvidia card Tuning**](#only-laptop-with-nvidia-card-tuning)
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
@@ -121,6 +121,8 @@ systemctl enable optimus-manager
 ```
 
 ### **Setup Guest OS**
+
+If you want the best performance for your system when gaming, I highly recommend you to try [AtlasOS](https://atlasos.net/). It's a custom Windows 10 OS which highly upgrades performance on the system by removing many Windows Tools and decreases the space needed for the installation. Only one bad news, you won't be able to have Windows Updates. If you need to update, you will have to reinstall.
 
 Download [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso) driver.
 

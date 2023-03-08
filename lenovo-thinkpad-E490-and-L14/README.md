@@ -17,7 +17,7 @@ This mode cannot allow to play high-end graphics games but I can still play AOE 
 - [**CPU Pinning**](#cpu-pinning)
 - [**Disk Tuning**](#disk-tuning)
 - [**Hyper-V Enlightenments and others**](#hyper-v-enlightenments-and-others)
-- [**Disable Memballoon](#disable-memballoon)
+- [**Disable Memballoon**](#disable-memballoon)
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
 - [**Windows drivers**](#windows-drivers)
@@ -84,6 +84,8 @@ virsh net-autostart default
 ```
 
 ### **Setup Guest OS**
+
+If you want the best performance for your system when gaming, I highly recommend you to try [AtlasOS](https://atlasos.net/). It's a custom Windows 10 OS which highly upgrades performance on the system by removing many Windows Tools and decreases the space needed for the installation. Only one bad news, you won't be able to have Windows Updates. If you need to update, you will have to reinstall.
 
 Download [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso) driver.
 

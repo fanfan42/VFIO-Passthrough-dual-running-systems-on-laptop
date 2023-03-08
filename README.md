@@ -9,7 +9,7 @@ Dual GPU PC :
 
 Single GPU PC (intel, only from 6th to 10th generation):
 - Lenovo Thinkpad E490 (intel i5 8th generation 8 cores, 16GB RAM)
-- Lenovo Thinpad L14 Gen 1 (intel i5 10th generation 8 cores, 16 GB RAM)
+- Lenovo Thinkpad L14 Gen 1 (intel i5 10th generation 8 cores, 16 GB RAM)
 - Toshiba Satellite Pro A50-E-156 (intel i7 8th generation 8 cores, 16GB RAM)
 
 The base OS used on the host is Manjaro (Mate)
