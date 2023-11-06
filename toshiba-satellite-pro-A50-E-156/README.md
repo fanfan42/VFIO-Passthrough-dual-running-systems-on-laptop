@@ -2,6 +2,9 @@
 
 This mode cannot allow to play high-end graphics games but I can still play AOE II DE with the lowest graphics settings 
 
+Update 6th november 2023, `qemu` version `8.1.1` has black screen bug after booting the VM (just after the "BIOS" boot).
+`qemu` version `8.1.2` is available today on Manjaro. You can also downgrade to version `8.0.4`
+
 ### **Table Of Contents**
 - [**Enable & Verify IOMMU and GVT**](#enable-verify-iommu-and-gvt)
 - [**Install required tools**](#install-required-tools)

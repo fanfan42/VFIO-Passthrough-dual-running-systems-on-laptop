@@ -1162,7 +1162,7 @@ This part of the tutorial is only if you can't play with a second monitor or if 
 
 First of all, you will need a dummy HDMI plug or you wont see anything in the looking-glass client. It costs less than 10 bucks on Internet.
 
-Start the previously created Guest, install the latest [Guest application](https://looking-glass.io/downloads) on your Windows. At this time, I installed the B6 version. Stop the Guest
+Start the previously created Guest, install the latest [Guest application](https://looking-glass.io/downloads) on your Windows. At this time, I installed the B6 version from Bleeding Edge, see below. Stop the Guest
 
 On the host, create the tmp configuration file :
 
@@ -1256,6 +1256,10 @@ Still on the Host, install looking-glass client :
 ```sh
 yay -S looking-glass-git
 ```
+
+Beware of the version installed or updated, it follows the `Bleeding Edge` version, reserved for the developpers.
+On 6th november 2023, I have `looking glass client` version `B6.r51`. It is compatible with `looking glass host` version `B6-92` on Windows.
+Maybe upper also, didn't try yet.
 
 You can now plug the dummy HDMI plug and start the VM, in the terminal, to access the Windows Guest, type the following command, it will launch looking-glass and your VM should be running (no need to be root) :
 
