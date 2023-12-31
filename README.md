@@ -12,9 +12,12 @@ Single GPU PC (intel, only from 6th to 10th generation):
 - Lenovo Thinkpad L14 Gen 1 (intel i5 10th generation 8 cores, 16 GB RAM)
 - Toshiba Satellite Pro A50-E-156 (intel i7 8th generation 8 cores, 16GB RAM)
 
+Single GPU PC (intel, 12th generation):
+- Lenovo Thinkpad L14 Gen 3 (Intel i7 12th generation, "6" cores, 16GB RAM)
+
 The base OS used on the host is Manjaro (Mate)
 
-This repository is based the one created by Mageas at https://gitlab.com/Mageas/vfio-single-gup-passthrough so I keep all his greetings, thanks to all of you
+This repository is based on the one created by Mageas at https://gitlab.com/Mageas/vfio-single-gup-passthrough so I keep all his greetings, thanks to all of you
 The only real differences is that I install it on a laptop and it's not a Single GPU passthrough, I can use both my Linux and Windows 10
 
 And of course, the link to the video : https://www.youtube.com/watch?v=CwEVj00SwYM.
