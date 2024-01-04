@@ -1,10 +1,10 @@
 # Lenovo Thinkpad L14 Gen3
 
-Remember, this mode of virtualization is "NOT" for gaming, I only use SR-IOV to create the new generation of virtualization on newest Intel CPU with integrated GPU to play old games which are not "AAA" games. Writing this documentation at this time is not perfect. I can play Warcraft III Reforged, AOE II DE and some games which are not GPU griedly.
+Remember, this mode of virtualization is "NOT" for gaming, I only use SR-IOV to create the new generation of virtualization on newest Intel CPU with integrated GPU to play old games which are not "AAA" games. Writing this documentation at this time is not perfect. I can play Warcraft III Reforged, AOE II DE and some games which are not GPU griedly. IMHO, GVT-g was far better but maybe it's only because the iGPU is not as good as older Intel iGPU.
 
-Most of this work is based from [Strongtz](https://github.com/strongtz/i915-sriov-dkms). I'm still "waiting" for thr SR-IOV work from Intel promised in the 4th quarter 2023 (but not respected). The most unconvenient thing in my case is that I can't turn my Laptop in sleeping mode with the module activated (it freezes my system). But, many thanks to the strontz repository and all my respects for this work. I use the Linux 6.1 LTS kernel for this setup. 
+Most of this work is based from [Strongtz](https://github.com/strongtz/i915-sriov-dkms). I'm still "waiting" for thr SR-IOV work from Intel promised in the 4th quarter 2023 (but not respected). The most unconvenient thing in my case is that I can't turn my Laptop in sleeping mode with the module activated (it freezes my system). But, many thanks to the strongtz repository and all my respects for this work. I use the Linux 6.1 LTS kernel for this setup. 
 
-This tutorial works on a 12th Intel generation and probably the 13th. Only one cons, I can't put my laptop in sleeping mode. The system freezes.
+This tutorial works on a 12th Intel generation and probably the 13/14th
 
 I play on a Windows 10 VM modified with AtlasOS installed (not mandatory, a Windows 10 VM can also do the work, see below)
 
@@ -34,8 +34,8 @@ I play on a Windows 10 VM modified with AtlasOS installed (not mandatory, a Wind
 ```sh
 pacman -S --needed qemu-base qemu-audio-pa qemu-hw-display-qxl libvirt edk2-ovmf virt-manager dnsmasq ebtables sysfsutils vim htop remmina xfreerdp yay
 ```
-You can replace iptables with iptables-nft if asked
-qemu-hw-display-qxl are only needed for the installation, you can remove it when the Guest configuration is finished.
+You can replace iptables with iptables-nft if asked.
+qemu-hw-display-qxl is only needed for the installation, you can remove it when the Guest configuration is finished.
 
 ```sh
 yay -S i915-sriov-dkms-git
@@ -90,7 +90,7 @@ virsh net-autostart default
 
 ### **Setup Guest OS**
 
-If you want the best performance for your system when gaming, I highly recommend you to try [AtlasOS](https://atlasos.net/). It's a custom Windows 10/11 OS which highly upgrades performance on the system by removing many Windows Tools and decreases the space needed for the installation. Only one bad news, you won't be able to have Windows Updates. If you need to update, you will have to reinstall. This mode is not mandatory but highly recommended, it's just for having the "best" OS for gaming in a VM. The installation for Atlas OS occurs after a clean installation and activation of Windows 10/11 VM, Professional Edition at least.
+If you want the best performance for your system when gaming, I highly recommend you to try [AtlasOS](https://atlasos.net/). It's a custom Windows 10/11 OS which highly upgrades performance on the system by removing many Windows Tools and decreases the space needed for the installation. If you need to update, you will have to reinstall. This mode is not mandatory but highly recommended, it's just for having the "best" OS for gaming in a VM. The installation for Atlas OS occurs after a clean installation and activation of Windows 10/11 VM, Professional Edition at least.
 
 Download [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso) driver.
 
@@ -105,6 +105,7 @@ Create your storage volume with the ***raw*** format. Select ***Customize before
 |:---------------------------------------------------------------|
 | set **CPU model** to **host-passthrough**                      |
 | set **CPU Topology** to 1 socket, 4 cores and 2 Threads(*)     |
+
 *My Intel Core 7 has 12 "cores/threads" but this kind of CPU is different from the previous generations we know since the Intel Core Pentium IV. I will explain it below.
 
 | In Sata                        |
@@ -152,7 +153,7 @@ The devices you want to passthrough :
 | `Tablet`                                                |
 | `USB redirect *`                                        |
 
-Note: When rebooting, the VM takes ~1 minute to boot, take your time and use Htop to "see" when the VM is really booting
+Note: When rebooting, the VM takes ~1 minute to boot, take your time and use Htop to "see" when the VM is really booting.
 
 ### **Libvirt Hook Helper**
 
@@ -234,7 +235,7 @@ vim /etc/libvirt/hooks/kvm.conf
 
 ```conf
 # CONFIG
-VM_MEMORY=10240
+VM_MEMORY=12288
 
 SRIOV_NUM_VFS=1
 SRIOV_PCI=0000:00:02.0
@@ -683,8 +684,8 @@ XML
 
 ```xml
 ...
-  <memory unit='KiB'>10485760</memory>
-  <currentMemory unit='KiB'>10485760</currentMemory>
+  <memory unit='KiB'>12582912</memory>
+  <currentMemory unit='KiB'>12582912</currentMemory>
   <memoryBacking>
     <hugepages/>
   </memoryBacking>
@@ -775,11 +776,30 @@ In `Device Manager` update *network* drivers with the local virtio iso `/path/to
 
 Select Start > Settings > System > Remote Desktop, and turn on Enable Remote Desktop.
 
-Select Search > gpedit.msc > Computer Configuration > Administrative Templates > Windows Components > Remote Desktop Services > Remote Desktop Session Host > Remote Session Environment > Use the hardware default graphics adapter for all Remote Desktop Services sessions > Edit > Enabled > OK
+Select Search > gpedit.msc:
 
-Don't activate RemoteFX options
+<ul>
+	<li>Computer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Session Host/Remote Session Environment/Use the hardware default graphics adapter for all Remote Desktop Services sessions > Edit > Enabled > OK</li>
+	<li>.../Remote Session Environment/Limit maximum color depth > Edit > Enabled and set it to 32 bits > OK</li>
+	<li>.../Remote Session Environment/Enforce Removal of Remote Desktop Wallpaper > Edit > Enabled > OK</li>
+	<li>.../Remote Session Environment/Limit maximum display resolution > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/Limit number of monitors > Edit > Enabled and set to 1 > OK</li>
+	<li>.../Remote Session Environment/Remove "Disconnect" option from Shut Down Dialog > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/Remove Windows Security from Start Menu > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/Use advanced RemoteFX graphics for RemoteApp > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/Prioritize H.264/AVC 444 graphics mode for Remote Desktop > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/Configure H.264/AVC hardware encoding for Remote Desktop > Edit > Enabled > OK</li>
+	<li>.../Remote Session Environment/Configure compression for RemoteFX data > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/Configure image quality for RemoteFX Adaptive Graphics > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/Enable RemoteFX encoding for RemoteFX clients designed for Windows Ser 2008 R2 SP1 > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/Configure RemoteFX Adaptive Graphics > Edit > Disabled > OK</li>
+	<li>.../Remote Session Environment/use WDDM graphics display driver for Remote Desktop Connection > Edit > Enabled > OK</li>
+	<li>Computer Configuration/Administrative Templates/Windows Components/Remote Desktop Services/Remote Desktop Session Host/Connexions/Select transfer protocols RDP > Edit > Enabled and select "Use UDP or TCP" </li>
+</ul>
 
-Now, configure remmina to connect to your virtual machine, I let my remmina conf in the folder. The main configuration to modify beside host, User, etc is the sound, Make it ***distant***
+Disable all options in ***RemoteFX for Windows Server 2008 R2*** folder still in gpedit.msc
+
+Now, configure remmina to connect to your virtual machine, I let my remmina conf in the folder. Compare it to yours in /home/you/.local/share/remmina
 
 ### **Optimize Windows**
 
@@ -795,4 +815,5 @@ iwr -useb https://git.io/debloat|iex
 In *Windows Settings*:
 - set ***Power supply*** to ***Performances***
 
-Note: Not necessary when AtlasOS installed, it's already done
+Note: Not necessary when AtlasOS installed, it's already done.
+

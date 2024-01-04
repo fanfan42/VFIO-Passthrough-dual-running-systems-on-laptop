@@ -7,12 +7,12 @@ Dual GPU PC :
 - Lenovo Legion Y540-15IRH (with nvidia GTX 1660Ti, intel core i5 8 cores, 16GB RAM)
 - Lenovo Legion 5 17ACH6H (with nvidia RTX 3060, amd ryzen 7 16 cores, 32GB RAM)
 
-Single GPU PC (intel, only from 6th to 10th generation):
+Single GPU PC (intel, only from 6th to 10th generation - GVT-g):
 - Lenovo Thinkpad E490 (intel i5 8th generation 8 cores, 16GB RAM)
 - Lenovo Thinkpad L14 Gen 1 (intel i5 10th generation 8 cores, 16 GB RAM)
 - Toshiba Satellite Pro A50-E-156 (intel i7 8th generation 8 cores, 16GB RAM)
 
-Single GPU PC (intel, 12th generation):
+Single GPU PC (intel, 12th generation - SR-IOV):
 - Lenovo Thinkpad L14 Gen 3 (Intel i7 12th generation, "6" cores, 16GB RAM)
 
 The base OS used on the host is Manjaro (Mate)
