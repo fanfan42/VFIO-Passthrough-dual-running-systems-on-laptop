@@ -1,7 +1,7 @@
 # VFIO-Passthrough-dual-running-systems-on-laptop
 ## Introduction
 
-This repository has not the goal to be the most precise configuration for running Passthrough VM. It's just some success tests I tried on my own laptops. At this time, I can succesfully install a Windows 10 VM on :
+This repository has not the goal to be the most precise configuration for running Passthrough VM. It's just some success tests I tried on my own laptops. At this time, I can succesfully install a Windows 10/11 VM on :
 
 Dual GPU PC :
 - Lenovo Legion Y540-15IRH (with nvidia GTX 1660Ti, intel core i5 8 cores, 16GB RAM)
@@ -49,4 +49,7 @@ The scripts for AMD GPUs.
 
 **[Nikolaos Karaolidis](https://blog.karaolidis.com/vfio/)**  
 A more specific Lenovo Legion POC with looking-glass
+
+**[Strongtz](https://github.com/strongtz/i915-sriov-dkms)**
+Without their work, SR-IOV would be really difficult
 

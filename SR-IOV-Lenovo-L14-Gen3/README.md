@@ -1,12 +1,12 @@
 # Lenovo Thinkpad L14 Gen3
 
-Remember, this mode of virtualization is "NOT" for gaming, I only use SR-IOV to create the new generation of virtualization on newest Intel CPU with integrated GPU to play old games which are not "AAA" games. Writing this documentation at this time is not perfect. I can play Warcraft III Reforged, AOE II DE and some games which are not GPU griedly. IMHO, GVT-g was far better but maybe it's only because the iGPU is not as good as older Intel iGPU.
+Remember, this mode of virtualization is "NOT" for gaming, I only use SR-IOV to create the new generation of virtualization on newest Intel CPU with integrated GPU to play old games which are not "AAA" games. You will have to tweak your games not just for bad graphics but also for 30 HZ/fps in all settings possible.
 
-Most of this work is based from [Strongtz](https://github.com/strongtz/i915-sriov-dkms). I'm still "waiting" for thr SR-IOV work from Intel promised in the 4th quarter 2023 (but not respected). The most unconvenient thing in my case is that I can't turn my Laptop in sleeping mode with the module activated (it freezes my system). But, many thanks to the strongtz repository and all my respects for this work. I use the Linux 6.1 LTS kernel for this setup. 
+This tutorial is based on [Strongtz](https://github.com/strongtz/i915-sriov-dkms) work. I'm still "waiting" for the SR-IOV work from Intel promised in the 4th quarter 2023 (but not respected). The most unconvenient thing in my case is that I can't turn my Laptop in sleeping mode with the module activated (it freezes my system). But, many thanks to the strongtz repository and all my respects for their work. I use the Linux 6.1 LTS kernel for this setup. 
 
 This tutorial works on a 12th Intel generation and probably the 13/14th
 
-I play on a Windows 10 VM modified with AtlasOS installed (not mandatory, a Windows 10 VM can also do the work, see below)
+I play on a Windows 10 VM for RDP modified with AtlasOS and Windows 11 + Looking Glass also modified with AtlasOS (not mandatory, a Windows 10/11 VM can also do the work but I didn't test it)
 
 ### **Table Of Contents**
 - [**Install required tools**](#install-required-tools)
@@ -25,17 +25,19 @@ I play on a Windows 10 VM modified with AtlasOS installed (not mandatory, a Wind
 - [**Disable Memballoon**](#disable-memballoon)
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
-- [**Configure RDP on Windows Guest**](#configure-rdp-on-windows-guest)
 - [**Windows drivers**](#windows-drivers)
 - [**Optimize Windows**](#optimize-windows)
+- [**Optional Configure RDP on Windows Guest**](#optional-configure-rdp-on-windows-guest)
+- [**Optional Configure Looking Glass and Idd Sample Driver**](#optional-configure-looking-glass-and-idd-sample-driver)
 
 ### **Install required tools**
 
 ```sh
-pacman -S --needed qemu-base qemu-audio-pa qemu-hw-display-qxl libvirt edk2-ovmf virt-manager dnsmasq ebtables sysfsutils vim htop remmina xfreerdp yay
+pacman -S --needed qemu-base qemu-audio-pa qemu-hw-display-qxl qemu-chardev-spice qemu-audio-spice libvirt edk2-ovmf virt-manager dnsmasq ebtables sysfsutils vim htop remmina xfreerdp yay
 ```
 You can replace iptables with iptables-nft if asked.
-qemu-hw-display-qxl is only needed for the installation, you can remove it when the Guest configuration is finished.
+
+Note: remmina and xfreerdp are only needed for RDP use case. qemu-hw-display-qxl, qemu-chardev-spice and qemu-audio-spice can be removed when RDP installation works.
 
 ```sh
 yay -S i915-sriov-dkms-git
@@ -90,7 +92,7 @@ virsh net-autostart default
 
 ### **Setup Guest OS**
 
-If you want the best performance for your system when gaming, I highly recommend you to try [AtlasOS](https://atlasos.net/). It's a custom Windows 10/11 OS which highly upgrades performance on the system by removing many Windows Tools and decreases the space needed for the installation. If you need to update, you will have to reinstall. This mode is not mandatory but highly recommended, it's just for having the "best" OS for gaming in a VM. The installation for Atlas OS occurs after a clean installation and activation of Windows 10/11 VM, Professional Edition at least.
+If you want the best performance for your system when gaming, I highly recommend you to try [AtlasOS](https://atlasos.net/). It's a custom Windows 10/11 OS which highly upgrades performance on the system by removing many Windows Tools and decreases the space needed for the installation. This mode is not mandatory but highly recommended, it's just for having the "best" OS for gaming in a VM. The installation for Atlas OS occurs after a clean installation and activation of Windows 10/11 VM, Professional Edition at least.
 
 Download [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso) driver.
 
@@ -100,6 +102,8 @@ Create your storage volume with the ***raw*** format. Select ***Customize before
 |:---------------------------------------------------------------------------|
 | set **Chipset** to **Q35**                                                 |
 | set **Firmware** to **UEFI x86_64: /usr/share/edk2-ovmf/x64/OVMF_CODE.fd** |
+
+Note:  **UEFI x86_64: /usr/share/edk2-ovmf/x64/OVMF_CODE.secboot.fd** for Windows 11
 
 | In CPUs                                                        |
 |:---------------------------------------------------------------|
@@ -124,7 +128,7 @@ Create your storage volume with the ***raw*** format. Select ***Customize before
 
 Windows can't detect the ***virtio disk***, so you need to ***Load Driver*** and select `virtio-iso/amd64/win10` when prompted.
 
-Windows can't connect to the internet, we will activate internet later in this tutorial.
+Windows can't connect to the internet, we will activate internet later in this tutorial. For Windows 11 installation, when arriving to the point where asked to connect to the Internet, ignore it and press ***MAJ+F10***. It will open a command-line interface, type `OOBE\BYPASSNRO` and confirm. The system will reboot without asking you to configure Internet for the end of the installation.  
 
 ### **Attaching PCI devices**
 
@@ -145,13 +149,13 @@ The devices you want to passthrough :
 |:--------------------------------------------------------------|
 | 00:02.1, the device previously created from the above command |
 
-| Remove/Update                                           |
-|:--------------------------------------------------------|
-| `Display spice` after configuring RDP                   |
-| `Channel spice`                                         |
-| `Video QXL`, Change it to `None`, after configuring RDP |
-| `Tablet`                                                |
-| `USB redirect *`                                        |
+| Remove/Update                                                          |
+|:-----------------------------------------------------------------------|
+| `Display spice` after configuring RDP / changed manually for Win11+LG  |
+| `Channel spice`                                                        |
+| `Video QXL`, Change it to `None`, after configuring RDP/Win11_LG       |
+| `Tablet`                                                               |
+| `USB redirect *`                                                       |
 
 Note: When rebooting, the VM takes ~1 minute to boot, take your time and use Htop to "see" when the VM is really booting.
 
@@ -346,7 +350,7 @@ Add yourself in the kvm group:
 usermod -aG kvm your_username
 ```
 
-Change the first line of the xml to (Don't apply the xml before the next add):
+Change the first line of the xml to (Don't apply the xml before adding anything relative to `<qemu:commandline>`, you will see below):
 
 <table>
 <tr>
@@ -366,7 +370,7 @@ XML
 </tr>
 </table>
 
-VM's audio can be routed to the host. You need **Pulseaudio**. Add/Modify these lines in the XML file :
+VM's audio can be routed to the host so you need **Pulseaudio**. Add/Modify these lines in the XML file :
 
 <table>
 <tr>
@@ -400,7 +404,7 @@ XML
 
 ### **CPU Pinning**
 
-My setup is an 12th Gen Intel(R) Core(TM) i7-1255U which has 2 P-Cores hyperthreaded and 8 E-Cores.
+My setup is a 12th Gen Intel(R) Core(TM) i7-1255U which has ***2 P-Cores*** hyperthreaded and ***8 E-Cores***.
 
 <details>
   <summary><b>How to bind P-Cores and E-Cores</b></summary>
@@ -538,10 +542,12 @@ XML
 </tr>
 </table>
 
+At this step, you can apply your xml configuration.
+
 ### **Disk Tuning**
 
 KVM and QEMU provide two paravirtualized storage backends:
-- virtio-blk (default)
+- virtio-blk (used here)
 - virtio-scsi (new)
 
 <table>
@@ -772,7 +778,23 @@ To get the *network* working properly you need to install the drivers.
 
 In `Device Manager` update *network* drivers with the local virtio iso `/path/to/virtio-driver`.
 
-### **Configure RDP on Windows Guest**
+### **Optimize Windows**
+
+#### *Windows debloater*
+
+If you don't want to install AtlasOS, you can still use this script in PowerShell to optimize your Windows guest (tested only on Windows 10). I personnally don't use it since AtlasOS removes nearly everything this script does.
+```powershell
+iwr -useb https://git.io/debloat|iex
+```
+
+#### *Better performances*
+
+In *Windows Settings*:
+- set ***Power supply*** to ***Performances***
+
+Note: Not necessary when AtlasOS installed, it's already done.
+
+### **Optional Configure RDP on Windows Guest**
 
 Select Start > Settings > System > Remote Desktop, and turn on Enable Remote Desktop.
 
@@ -799,21 +821,150 @@ Select Search > gpedit.msc:
 
 Disable all options in ***RemoteFX for Windows Server 2008 R2*** folder still in gpedit.msc
 
-Now, configure remmina to connect to your virtual machine, I let my remmina conf in the folder. Compare it to yours in /home/you/.local/share/remmina
+Now, configure remmina to connect to your virtual machine, I let my remmina conf in the folder. Compare it to yours in `/home/you/.local/share/remmina`
 
-### **Optimize Windows**
+### **Configure Looking Glass and Idd Sample Driver**
 
-#### *Windows debloater*
+Note : at this time HDR display is not supported on Windows 10, so I only tested it on Windows 11
 
-If you don't want to install AtlasOS, you can still use this script in PowerShell to optimize your Windows guest. I personnally don't use it since AtlasOS removes nearly everything this script does
-```powershell
-iwr -useb https://git.io/debloat|iex
+#### *Idd Sample Driver*
+
+Indirect Display Driver Sample creates a virtual display on Windows, it's needed to attach Looking Glass when using SR-IOV GPU. Go on [Virtual Display Driver](https://github.com/itsmikethetech/Virtual-Display-Driver) and download the latest release for Windows 11, with HDR support. Unzip the folder and copy `IddSampleDriver` directory in `C:\`. Go in the directory :
+
+<ul>
+	<li>Right-Click on "installCert.bat" > Execute with admin privileges > Close the window when finished</li>
+    <li>Open "Device Manager" > Click on any device > Click on "Action" menu > "Add Legacy Hardware"</li>
+	<li>Select "Add hardware from a list (Advanced)" > Select Display Adapters > Click "Have Disk..." > Browse > C:\IddSampleDriver\IddSampleDriver.inf</li>
+</ul>
+
+It's very important to understand that this vGPU is not powerful for gaming. On this example, I can only support a maximum of 30 HZ/fps as said before. So for the best performance:
+
+<ul>
+	<li>Go to "Settings" > "System" > "Display" > Activate "Use HDR" > I set the "Display resolution" to 1920x1080</li>
+	<li>In "Advanced display" > "Choose a refresh rate" > 30Hz</li>
+	<li>In "Graphics" > after installing games, set each game on "High performance"</li>
+	<li>Still in "Graphics" > "Change default graphic settings" > set your vGPU in "Default high performance GPU" > Set "Auto HDR" to on</li>
+</ul>
+
+In `C:\IddSampleDriver\option.txt`, you can remove all unusable options, these are the ones I keep:
+
+```
+1
+1280, 1024, 30
+1360, 768, 30
+1366, 768, 30
+1400, 1050, 30
+1440, 900, 30
+1600, 900, 30
+1680, 1050, 30
+1600, 1024, 30
+1920, 1080, 30
+
 ```
 
-#### *Better performances*
+#### *Looking Glass*
 
-In *Windows Settings*:
-- set ***Power supply*** to ***Performances***
+Install the latest `Bleeding Edge` [Host application](https://looking-glass.io/downloads) on your Windows.
 
-Note: Not necessary when AtlasOS installed, it's already done.
+On the host, create the tmp configuration file :
+
+<details>
+  <summary><b>Create Looking-glass tmp file</b></summary>
+
+```sh
+vim /etc/tmpfiles.d/10-looking-glass.conf
+```
+  <table>
+  <tr>
+  <th>
+    /etc/tmpfiles.d/10-looking-glass.conf
+  </th>
+  </tr>
+
+  <tr>
+  <td>
+
+```sh
+f	/dev/shm/looking-glass	0666	root	libvirt	-
+```
+
+  </td>
+  </tr>
+  </table>
+</details>
+
+On the XML file of the Guest, add these lines to create a shared memory area for looking-glass
+
+<table>
+<tr>
+<th>
+XML
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<devices>
+  ...
+  <shmem name="looking-glass">
+    <model type="ivshmem-plain"/>
+    <size unit="M">64</size>
+     <address type="pci" domain="0x0000" bus="0x10" slot="0x01" function="0x0"/>
+  </shmem>
+</devices>
+
+```
+
+</td>
+</tr>
+</table>
+
+Add/Modify these lines to the XML file for configuring the graphics :
+
+<table>
+<tr>
+<th>
+XML
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<devices>
+  ...
+  <graphics type="spice" autoport="yes">
+    <listen type="address"/>
+    <image compression="off"/>
+  </graphics>
+  ...
+  <video>
+    <model type="none"/>
+  </video>
+  ...
+</devices>
+
+```
+</td>
+</tr>
+</table>
+
+Still on the host, install looking-glass client :
+
+```sh
+yay -S looking-glass-git
+```
+
+To access the Windows Guest, in a terminal, type the following command, it will launch looking-glass and your VM should be running (no need to be root) :
+
+```sh
+# 97 is for rightCtrl key - sudo showkey  --keycodes 
+looking-glass-client -m 97 -F input:grabKeyboardOnFocus input:rawMouse input:autoCapture
+```
+
 
