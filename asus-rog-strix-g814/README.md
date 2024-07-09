@@ -36,13 +36,13 @@ Note : Yes, Windows 11 is normally only available with secboot activated. [Rufus
 
 ### **Enable IOMMU and install required packages**
 ```sh
-sudo pacman -S --needed qemu-base libvirt edk2-ovmf virt-manager dnsmasq ebtables vim linuxxx-nvidia optimus-manager
+sudo pacman -S --needed qemu-base libvirt edk2-ovmf virt-manager dnsmasq ebtables vim linuxxx-nvidia optimus-manager qemu-hw-usb-host
 ```
 You can replace iptables with iptables-nft if asked. linuxxx-nvidia refers to your kernel version, ex: linux610-nvidia.
 
 WARNING : At this time, qemu 9.0 is available but there are some warnings because of ***topoext*** deprecated in this version. Please install manjaro-downgrade and execute :
 ```sh
-sudo downgrade qemu-base qemu-common qemu-img qemu-system-x86-firmware qemu-system-x86
+sudo downgrade qemu-base qemu-common qemu-img qemu-system-x86-firmware qemu-system-x86 qemu-hw-usb-host
 ```
 And select version 8.2 for all these packages. I will update this how-to later in the future.
 
@@ -126,7 +126,7 @@ Create your storage volume with the ***raw*** format. Select ***Customize before
 |:---------------------------------------------------------------------------|
 | set **Chipset** to **Q35**                                                 |
 | set **Firmware** to **UEFI x86_64: /usr/share/edk2-ovmf/x64/OVMF_CODE.fd** |
-asus-rog-strix-g814/README.md
+
 WARNING: Click on "Apply" each time you switch panels in virt-manager
 
 | In CPUs                                                |
