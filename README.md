@@ -16,7 +16,7 @@ Single GPU PC (intel, only from 6th to 10th generation - GVT-g):
 Single GPU PC (Intel, 12th generation - SR-IOV):
 - Lenovo Thinkpad L14 Gen 3 (Intel Core i7 12th gen 2 P-cores 8 E-cores, 16GB RAM)
 
-The base OS used on the host is Manjaro (~~Mate~~ xfce)
+The base OS used on the host is Manjaro (~~Mate~~ Xfce)
 
 This repository is based on the one created by Mageas at https://gitlab.com/Mageas/vfio-single-gup-passthrough so I keep all his greetings, thanks to all of you
 The only real differences is that I install it on a laptop and it's not a Single GPU passthrough, I can use both my Linux and Windows 10/11
@@ -24,6 +24,8 @@ The only real differences is that I install it on a laptop and it's not a Single
 And of course, the link to the video (in French) : https://www.youtube.com/watch?v=CwEVj00SwYM.
 
 The VM created is close to native performance with 3% of performance losses. And I can get more performance when passing a dedicated NVMe drive (See Asus laptop)
+
+PS: The "Deprecated" folders may still work. It's just that these laptops were sold so I can't test features on them anymore. 
 
 ### **Thanks to**
 
@@ -51,6 +53,6 @@ The scripts for AMD GPUs.
 **[Nikolaos Karaolidis](https://blog.karaolidis.com/vfio/)**  
 A more specific Lenovo Legion POC with looking-glass
 
-**[Strongtz](https://github.com/strongtz/i915-sriov-dkms)**
+**[Strongtz](https://github.com/strongtz/i915-sriov-dkms)**  
 Without their work, SR-IOV would be really difficult
 

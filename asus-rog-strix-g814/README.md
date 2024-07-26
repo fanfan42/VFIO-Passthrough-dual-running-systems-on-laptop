@@ -1,6 +1,6 @@
 # Asus ROG Strix G18 G814
 ## Introduction
-This work is based on my previous configuration on Lenovo Legion 5. I only use Nvidia driver because, when on Linux, I use some emulation tools which prefer Nvidia driver. Also, I didn't verify if Nouveau is compatible with Nvidia RTX 40xx. When I bought this laptop, it was delivered with no OS, 16GB of RAM and a single NVMe PCI drive. In order to make this installation working, you will need, at least, a second NVMe drive installed in the laptop. This laptop has a single 16GB RAM card installed, consider buying another one so you can use the dual-channel. For better performance, I reinstalled a dual-boot system so I can passthrough a full drive with Windows 11 to the VM. Also, it allows me to boot Windows and install updates for BIOS/firmware updates that fwupd still doesn't manage on Linux. For now, I didn't "create" a second VM for looking-glass, but the workaround to make it available should be similar to my previous configuration on Lenovo Legion 5. And last point, I found a workaround working on Lenovo Legion 5 for Nvidia RTX 3060. With Nvidia RTX 4080, you can directly load Nvidia driver for more screens attached to the laptop at start. Personnaly, I prefer my old workaround because, most of the time, I only need the default screen attached to my iGPU (Intel Xe), I really appreciate not consuming too much energy when I don't need it.
+This work is based on my previous configuration on Lenovo Legion 5. I only use Nvidia driver because, when on Linux, I use some emulation tools which prefer Nvidia driver. Also, I didn't verify if Nouveau is compatible with Nvidia RTX 40xx. When I bought this laptop, it was delivered with no OS, 16GB of RAM and a single NVMe PCI drive. In order to make this installation working, you will need, at least, a second NVMe drive installed in the laptop. This laptop has a single 16GB RAM card installed, consider buying another one so you can use the dual-channel. For better performance, I reinstalled a dual-boot system so I can passthrough a full drive with Windows 11 to the VM. Also, it allows me to boot Windows and install updates for BIOS/firmware updates that fwupd still doesn't manage on Linux. And last point, I found a workaround working on Lenovo Legion 5 for Nvidia RTX 3060. With Nvidia RTX 4080, you can directly load Nvidia driver for more screens attached to the laptop at start. Personnaly, I prefer my old workaround because, most of the time, I only need the default screen attached to my iGPU (Intel Xe), I really appreciate not consuming too much energy when I don't need it.
 
 ### **Table Of Contents**
 - [**Installing Windows 11 on second NVMe drive**](#installing-windows-11-on-second-nvme-drive)
@@ -21,6 +21,7 @@ This work is based on my previous configuration on Lenovo Legion 5. I only use N
 - [**Hugepages**](#hugepages)
 - [**CPU Governor**](#cpu-governor)
 - [**Optimize Windows**](#optimize-windows)
+- [**Install looking-glass**](#install-looking-glass)
 
 ### **Installing Windows 11 on second NVMe drive**
 Also possible with Windows 10, but didn't test it. I won't explain all the steps, you have plenty of tutorials for helping you install a LiveUSB and configure Windows.
@@ -591,7 +592,7 @@ My setup is an Intel Core i7 13650HX with Xe Graphics which has 6 P-core (Hypert
 <details>
   <summary><b>How to bind the threads to the core</b></summary>
 
-It's very important that when we passthrough a core, we include its sibling. To get a sense of your cpu topology, use the command `lscpu -e`. A matching core id (i.e. "CORE" column) means that the associated threads (i.e. "CPU" column) run on the same physical core. With intel P and E cores, it's still difficult to have a perfect matching, tht's why, I prefered, in the previous steps, to only give Cores instead of threads in the CPU topology
+It's very important that when we passthrough a core, we include its sibling. To get a sense of your cpu topology, use the command `lscpu -e`. A matching core id (i.e. "CORE" column) means that the associated threads (i.e. "CPU" column) run on the same physical core. With intel P and E cores, it's still difficult to have a perfect matching, that's why, I prefered, in the previous steps, to only give Cores instead of threads in the CPU topology
 
 ```
 CPU NODE SOCKET CORE L1d:L1i:L2:L3 ONLINE    MAXMHZ   MINMHZ      MHZ
@@ -671,8 +672,8 @@ XML
     <vcpupin vcpu="11" cpuset="15"/>
     <vcpupin vcpu="12" cpuset="16"/>
     <vcpupin vcpu="13" cpuset="17"/>
-	<vcpupin vcpu="13" cpuset="18"/>
-	<vcpupin vcpu="13" cpuset="19"/>
+    <vcpupin vcpu="14" cpuset="18"/>
+    <vcpupin vcpu="15" cpuset="19"/>
     <emulatorpin cpuset="0-1,12-13"/>
     <iothreadpin iothread="1" cpuset="0-1,12-13"/>
   </cputune>
@@ -984,8 +985,154 @@ In *Windows Settings*:
 - set ***Power suply*** to ***Performances***
 Note : it's already done when installing AtlasOS
 
-If you have and NVIDIA card, in *NVIDIA Control Panel*:
+In *NVIDIA Control Panel*:
 - set ***Texture filtering quality*** to ***High performance***
 - set ***Power management mode*** to ***Max performance***
 
+### **Install looking-glass**
 
+#### *Requirements*
+
+This part of the tutorial is only if you can't play with a second monitor or if you want to have the 2 options in all case. In my case, I created another Guest (VM) based on the previously created. I cloned the domain on virt-manager. The new VM still uses the same PCI NVMe drive for booting the Windows. First of all, you will need a dummy HDMI plug or you wont see anything in the looking-glass client. It costs less than 10 bucks on Internet.
+
+#### *Install Looking Glass Host Binary*
+
+Start the previously created Guest, install the latest stable [Guest application](https://looking-glass.io/downloads) on your Windows.
+
+#### *Install looking glass (client) and qemu packages for sound and graphics*
+
+```sh
+sudo pacman -S qemu-audio-pa qemu-ui-spice-core qemu-ui-opengl yay
+```
+
+Remember to use downgrade instead of pacman in case you still don't want to use qemu v9+. yay is only for installing looking-glass from the AUR, this package still doesn't exist in official repositories on Manjaro.
+
+```sh
+yay -S looking-glass
+```
+
+#### *Configure the guest*
+
+On the host, create the tmp configuration file :
+
+<details>
+  <summary><b>Create Looking-glass tmp file</b></summary>
+
+```sh
+vim /etc/tmpfiles.d/10-looking-glass.conf
+```
+  <table>
+  <tr>
+  <th>
+    /etc/tmpfiles.d/10-looking-glass.conf
+  </th>
+  </tr>
+
+  <tr>
+  <td>
+
+```sh
+f	/dev/shm/looking-glass	0666	root	libvirt	-
+```
+
+  </td>
+  </tr>
+  </table>
+</details>
+
+On the XML file of the guest, add these lines to create a shared memory area for looking-glass
+
+<table>
+<tr>
+<th>
+XML
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<devices>
+  ...
+  <shmem name="looking-glass">
+    <model type="ivshmem-plain"/>
+    <size unit="M">64</size>
+  </shmem>
+</devices>
+
+```
+
+</td>
+</tr>
+</table>
+
+Normally, if you followed all the tutorial, at this point you shouldn't have any graphics on libvirt, add these lines to the XML file in libvirt :
+
+<table>
+<tr>
+<th>
+XML
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<devices>
+  ...
+  <graphics type="spice" autoport="yes">
+    <listen type="address"/>
+    <image compression="off"/>
+  </graphics>
+  <video>
+    <model type="none"/>
+  </video>
+  ...
+</devices>
+
+```
+</td>
+</tr>
+</table>
+
+And last but not least, you may need sound to enjoy it in your VM, add these lines in the XML file :
+
+<table>
+<tr>
+<th>
+XML
+</th>
+</tr>
+
+<tr>
+<td>
+
+```xml
+...
+<devices>
+  ...
+  <sound model="ich9">
+      <audio id="1"/>
+  </sound>
+  <audio id="1" type="pulseaudio" serverName="/run/user/1000/pulse/native">
+      <input mixingEngine="no"/>
+      <output mixingEngine="no"/>
+  </audio>
+  ...
+</devices>
+
+```
+</td>
+</tr>
+</table>
+
+You can now plug the dummy HDMI plug and start the VM, in the terminal, to access the Windows Guest, type the following command, it will launch looking-glass and your VM should be running (no need to be root) :
+
+```sh
+# 97 is for rightCtrl key - sudo showkey  --keycodes 
+looking-glass-client -m 97 -F input:grabKeyboardOnFocus input:rawMouse input:autoCapture
+```
