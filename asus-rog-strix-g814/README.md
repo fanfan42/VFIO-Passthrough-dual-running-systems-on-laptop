@@ -735,7 +735,7 @@ XML
     <qemu:arg value="-rtc"/>
     <qemu:arg value="base=localtime"/>
     <qemu:arg value="-cpu"/>
-    <qemu:arg value="host,host-cache-info=on,kvm=off,l3-cache=on,kvm-hint-dedicated=on,migratable=no,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_vendor_id=deadbeef,hv_vendor_id=Intel,+invtsc,+topoext"/>
+    <qemu:arg value="host,host-cache-info=on,kvm=on,l3-cache=on,kvm-hint-dedicated=on,migratable=no,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_vendor_id=deadbeef,+invtsc,+topoext,+x2apic,+pdpe1gb,-spec-ctrl,-md-clear,-ssbd"/>
   </qemu:commandline>
 </devices>
 ```
@@ -743,6 +743,25 @@ XML
 </td>
 </tr>
 </table>
+
+#### **Explanation on CPU options**
+
+* host : Pass "real" CPU and all native extensions to the Guest
+* host_cache_info=on and l3-cache=on : Pass the cache information to the Guest
+* kvm=on (the default) : Use allow the use of KVM and prevent emulation by Qemu
+* kvm-hint-dedicated=on : Indicates to the Guest that cores passed are dedicated to its own usage. Better performance
+* migratable=off : Prevent Guest migration when running
+* +topoext : A complement to the CPU pinning
+* +invtsc : Time Stamp Counter (TSC) does not vary. Used by applications which are sensitive to time (Online games)
+* +x2apic : Optimize interruption in system calls
+* +pdpe1gb : Improve Page Memory allocation to 1GB for the Guest
+* -spec-ctrl, -md-clear and -ssbd : Deactivate some securities. The Guest is vulnerable to Spectre, Meltdown and Speculative Store Bypass. Improve performance again
+
+Specific options specific to Windows Guests (hyperV) :
+* hv_relaxed : Ease the guest when in high load
+* hv_spinlocks=0x1fff : Reduce the contention on Spinlocks. May improve hyperthreaded applications
+* hv_vapic : Optimize interruption management (APIC)
+* hv_time : Synchronize clock between Host and Guest
 
 ### **Disable Memballoon**
 

@@ -227,6 +227,6 @@
     <qemu:arg value='-rtc'/>
     <qemu:arg value='base=localtime'/>
     <qemu:arg value='-cpu'/>
-    <qemu:arg value='host,host-cache-info=on,kvm=off,l3-cache=on,kvm-hint-dedicated=on,migratable=no,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_vendor_id=deadbeef,hv_vendor_id=Intel,+invtsc,+topoext'/>
+    <qemu:arg value='host,host-cache-info=on,kvm=on,l3-cache=on,kvm-hint-dedicated=on,migratable=no,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_vendor_id=deadbeef,+invtsc,+topoext,+x2apic,+pdpe1gb,-spec-ctrl,-md-clear,-ssbd'/>
   </qemu:commandline>
 </domain>
