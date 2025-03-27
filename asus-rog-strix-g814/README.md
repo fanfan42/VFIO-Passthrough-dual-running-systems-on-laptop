@@ -37,15 +37,24 @@ Note : Yes, Windows 11 is normally only available with secboot activated. [Rufus
 
 ### **Enable IOMMU and install required packages**
 ```sh
-sudo pacman -S --needed qemu-base libvirt edk2-ovmf virt-manager dnsmasq ebtables vim linuxxx-nvidia optimus-manager qemu-hw-usb-host
+sudo pacman -S --needed qemu-base libvirt edk2-ovmf virt-manager dnsmasq ebtables vim linuxxx-nvidia optimus-manager-git qemu-hw-usb-host
 ```
 You can replace iptables with iptables-nft if asked. linuxxx-nvidia refers to your kernel version, ex: linux610-nvidia.
 
-WARNING : At this time, qemu 9.0 is available but there are some warnings because of ***topoext*** deprecated in this version. Please install manjaro-downgrade and execute :
-```sh
-sudo downgrade qemu-base qemu-common qemu-img qemu-system-x86-firmware qemu-system-x86 qemu-hw-usb-host
+~~WARNING : At this time, qemu 9.0 is available but there are some warnings because of ***topoext*** deprecated in this version. Please install manjaro-downgrade and execute :~~
+
+~~sudo downgrade qemu-base qemu-common qemu-img qemu-system-x86-firmware qemu-system-x86 qemu-hw-usb-host~~
+
+~~And select version 8.2 for all these packages. I will update this how-to later in the future.~~
+
+There is no longer problem with qemu version 9.x, at this time writing, I'm on version 9.2.2-1 which is the latest. Don't forget to update your XML file so it indeed uses the latest machine version according to qemu version. It's this line in your XML config :
 ```
-And select version 8.2 for all these packages. I will update this how-to later in the future.
+<type arch="x86_64" machine="pc-q35-9.2">hvm</type>
+```
+You can see it in my XML config on this repository. Last problem, when I created this part of my step-by-step, OVMF vars were on 2 Megabytes. I don't remember which version it was but on a certain update, these vars were on 4 Megabytes and VM created at this time couldn't use the new version of OVMF. I had to use a script found on Internet to convert these vars. The script is on the repository if you encounter the problem. If your VM is called "win11" for example, use the script like this :
+```sh
+bash 2M_VARS-to-4M_VARS.sh -i /var/lib/libvirt/qemu/nvram/win11_VARS.fd
+```
 
 Add yourself in all these groups :
 ```sh
@@ -92,15 +101,28 @@ IOMMU Group 16:
 ```
 
 ### **Configure optimus-manager and blacklist modules**
-In /usr/share/optimus-manager.conf (The conf is reset each time optimus-manager is updated) :
+In your terminal, execute these commands to configure optimus-manager :
 ```sh
+sudo cp /usr/share/optimus-manager/optimus-manager.conf /etc/optimus-manager/optimus-manager.conf
+```
+In /etc/optimus-manager/optimus-manager.conf, make sure to configure these lines :
+```
 [optimus]
-...
-pci_remove=yes
 ...
 startup_mode=integrated
 ...
+startup_auto_extpower_mode=integrated
+startup_auto_battery_mode=integrated
+startup_auto_nvdisplay_on_mode=nvidia
+startup_auto_nvdisplay_off_mode=integrated
+...
+pci_remove=yes
+...
 auto_logout=no
+```
+At last, start the optimus-manager service :
+```sh
+sudo systemctl enable --now optimus-manager
 ```
 
 In /etc/modprobe.d/blacklist.conf :
