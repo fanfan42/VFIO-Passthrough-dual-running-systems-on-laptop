@@ -1,4 +1,10 @@
 # VFIO-Passthrough-dual-running-systems-on-laptop
+
+## WARNING: Deprecation and future
+This repository is "abandoned". Most of these step-by-step won't work due to evolutions (and regressions). I still keep it for now, it can be useful. However, the future is here: [Linux Sub Windows](https://github.com/fanfan42/ansible-role-lsw).
+
+It's my new project. It manages nearly full automatic installation of GVT-g, SR-IOV and of course, Passthrough. It's really advanced right now so please, give it a try et don't hesitate to open issues if needed.
+
 ## Introduction
 
 This repository has not the goal to be the most precise configuration for running Passthrough VM. It's just some success tests I tried on my own laptops. At this time, I can succesfully install a Windows 10/11 VM on :
